@@ -52,7 +52,7 @@ const AvailableHouses = () => {
               <p style={{ color: 'black' }}>Address: {property.Address}</p>
               <p style={{ color: 'black' }}>Details: {property.Details}</p>
               <p style={{ color: 'black' }}>Added: {property.createdAt.toDate().toLocaleDateString()}</p>
-            </div>
+``            </div>
           ))}
         </div>
       )}
