@@ -1,0 +1,58 @@
+[
+    {
+      "name": "Oceanview Apartment",
+      "price": 350000,
+      "description": "A stunning apartment with breathtaking ocean views, modern interiors, and close to local amenities.",
+      "address": "123 Seaside Avenue, Miami, FL",
+      "images": [
+        "/378599027.jpg",
+        "/378599027.jpg",
+        "/378599027.jpg"
+      ]
+    },
+    {
+      "name": "Mountain Retreat Cabin",
+      "price": 250000,
+      "description": "Cozy cabin located in the mountains, perfect for nature enthusiasts and adventurers.",
+      "address": "456 Pinewood Lane, Aspen, CO",
+      "images": [
+        "/Untitled.jpg",
+        "/Untitled.jpg",
+        "/Untitled.jpg"
+      ]
+    },
+    {
+      "name": "Luxury Urban Condo",
+      "price": 800000,
+      "description": "A high-end condo with state-of-the-art amenities, located in the heart of the city.",
+      "address": "789 Downtown Boulevard, New York, NY",
+      "images": [
+        "/378599027.jpg",
+        "/378599027.jpg",
+        "/378599027.jpg"
+      ]
+    },
+    {
+      "name": "Country Side Villa",
+      "price": 450000,
+      "description": "Charming villa surrounded by greenery, offering peace and tranquility away from the city.",
+      "address": "321 Meadow Road, Austin, TX",
+      "images": [
+        "/378599027.jpg",
+        "/378599027.jpg",
+        "/378599027.jpg"
+      ]
+    },
+    {
+      "name": "Modern Family Home",
+      "price": 300000,
+      "description": "A spacious family home with modern design, located in a quiet neighborhood.",
+      "address": "654 Maple Street, Portland, OR",
+      "images": [
+        "/378599027.jpg",
+        "/378599027.jpg",
+        "/378599027.jpg"
+      ]
+    }
+  ]
+  

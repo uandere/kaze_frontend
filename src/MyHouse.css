@@ -1,0 +1,53 @@
+/* MyHouses.css */
+
+/* Style pagination container */
+.ant-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  /* Pagination items have no background */
+  .ant-pagination-item {
+    border: 1px solid #fffe46; /* Light yellow border */
+    background: transparent; /* No background for non-active items */
+  }
+  
+  /* Change the text color of active pagination item */
+  .ant-pagination a {
+    color: black !important; /* Set text color of active pagination item to black */
+  }
+  
+  /* Change the background color and border of active pagination item */
+  .ant-pagination .ant-pagination-item-active {
+    background-color: #f8e002 !important; /* Yellow background for active item */
+    border-color: #fffe46 !important; /* Light yellow border */
+    color: #000000 !important; /* Dark text for visibility */
+  }
+  
+  /* Change background color of hovered pagination item */
+  .ant-pagination-item:hover {
+    background-color: #f8e002 !important; /* Yellow background on hover */
+    border-color: #fffe46 !important; /* Light yellow border on hover */
+    color: #fffe46 !important;
+  }
+  
+  /* Remove focus outline */
+  .ant-pagination-item:focus {
+    outline: none;
+  }
+  
+  .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination-next .ant-pagination-item-link {
+    color: gold !important;
+  }
+
+  /* Optionally, change the arrow color when hovered */
+  .ant-pagination-prev:hover .ant-pagination-item-link,
+  .ant-pagination-next:hover .ant-pagination-item-link {
+    color: #ffd700 !important;
+  }
+
+.slick-arrow .slick-next, .slick-arrow .slick-next  {
+    color:#f8e002;
+}
