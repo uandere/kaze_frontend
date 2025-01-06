@@ -1,0 +1,8 @@
+.custom-button:hover {
+  color: gold !important;
+}
+
+.custom-bg:hover {
+  color: black !important;
+  background-color: gold !important;
+}
