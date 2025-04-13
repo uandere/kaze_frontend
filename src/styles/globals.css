@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background-color: black;
+  color: white
+}
+
+.custom-button:hover {
+  color: gold !important;
+}
+
+.custom-bg:hover {
+  color: black !important;
+  background-color: gold !important;
+}
+
+.custom-pagination .ant-pagination-item {
+  border-color: gold;
+  background-color: transparent !important;
+  color: gold !important;
+}
+
+.custom-pagination .ant-pagination-item a {
+  border-color: gold !important;
+  color: gold !important;
+}
+
+.custom-pagination .ant-pagination-item-active {
+  background-color: gold !important; /* Background color of active page */
+  border-color: gold !important;
+}
+
+.custom-pagination .ant-pagination-item-active a {
+  color: black !important;
+}
+
+.custom-pagination .ant-pagination-prev .ant-pagination-item-link,
+.custom-pagination .ant-pagination-next .ant-pagination-item-link {
+  color: gold !important;
+  border-color: gold !important;
+}
+
+.custom-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.custom-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  background-color: gold !important;
+}
+
+
+.custom-pagination .ant-pagination-item:hover {
+  background-color: rgba(255, 215, 0, 0.2) !important; /* Light gold hover background */
+  border-color: gold !important;
+}
+
+.custom-pagination .ant-pagination-item:hover a {
+  color: gold !important;
+}
