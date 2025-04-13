@@ -3,6 +3,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut  } from "firebase
 import { getFirestore,  collection, addDoc, query, orderBy, onSnapshot, serverTimestamp  } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU",
   authDomain: "kaze-frontend.firebaseapp.com",
