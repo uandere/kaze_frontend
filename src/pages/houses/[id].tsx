@@ -276,21 +276,22 @@ const RentingPage: React.FC = () => {
   const [listingId, setListingId] = useState<string | null>(null);
 
 
-  const fetchListingIdByUserId = async (targetUserId: string) => {
+  const fetchListingIdByUserId = async (targetUserId: string, currentListingId: string) => {
     const db = getFirestore();
     const listingsRef = collection(db, "listings");
     const q = query(listingsRef, where("userId", "==", targetUserId));
     try {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        return doc.id;
+        const matchedDoc = querySnapshot.docs.find(doc => doc.id === currentListingId);
+        return matchedDoc?.id || null;
       }
     } catch (error) {
       console.error("Error fetching listing by userId:", error);
     }
     return null;
   };
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -310,7 +311,7 @@ const RentingPage: React.FC = () => {
             if (userSnap.exists()) {
               const userData = userSnap.data();
               setUser(userData);
-              const foundListingId = await fetchListingIdByUserId(userId);
+              const foundListingId = await fetchListingIdByUserId(userId, id as string);
               setListingId(foundListingId);
             }
           }
