@@ -4,15 +4,17 @@ import { useRouter } from "next/router";
 import EstateCard from "@/components/estateCard";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
+import { useUser } from "../../context/context";
 
 const Chatroom = () => {
   const router = useRouter();
   const { id } = router.query;
+  const { user } = useUser();
 
   const [houses, setHouses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [responseData, setResponseData] = useState<any | null>(null);
 
-  // Extract the prefix when `id` is available
   const getPrefix = (id: string | string[] | undefined): string | null => {
     if (!id) return null;
     const str = Array.isArray(id) ? id[0] : id;
@@ -25,23 +27,88 @@ const Chatroom = () => {
   // Fetch all houses
   useEffect(() => {
     const fetchHouses = async () => {
-      setLoading(true);
-      const querySnapshot = await getDocs(collection(db, "listings"));
-      const data = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setHouses(data);
-      setLoading(false);
+      try {
+        const querySnapshot = await getDocs(collection(db, "listings"));
+        const data = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("Fetched houses:", data);
+        setHouses(data);
+      } catch (err) {
+        console.error("Failed to fetch houses:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchHouses();
   }, []);
-  console.log("Houses:", houses);
-  console.log("House ID:", houseId);
-  // Find the house matching the ID prefix
+
   const matchedHouse = houses.find((house) => house.id === houseId);
-  console.log("Matched House:", matchedHouse);
+
+  // Function to fetch agreement status
+  const fetchAgreementStatus = async () => {
+    try {
+      const response = await fetch(
+        `https://kazeapi.uk/agreement/status?tenant_id=${user?.uid}&landlord_id=${matchedHouse?.userId}&housing_id=${matchedHouse?.id}`
+      );
+      const data = await response.json(); //{ status: "Signed" };
+      console.log("Agreement Status:", data);
+      setResponseData(data); // Optionally store the response data
+    } catch (error) {
+      console.error("Error fetching agreement status:", error);
+    }
+  };
+
+  const generateCall = async () => {
+    try {
+      const jwtToken = await user?.getIdToken();
+      console.log("JWT Token:", jwtToken);
+      const tenantId = user?.uid;
+      console.log("Tenant ID:", tenantId);
+      console.log("Matched House:", matchedHouse);
+      console.log("Matched House User ID:", matchedHouse?.userId);
+      if (!matchedHouse?.userId || !tenantId) {
+        console.error("Missing landlord_id or tenant_id");
+        return;
+      }
+
+      const response = await fetch("https://kazeapi.uk/agreement/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          landlord_id: matchedHouse.userId,
+          housing_id: matchedHouse.id,
+        }),
+      });
+
+      const contentType = await response.headers.get("content-type");
+      const rawText = await response.text();
+      console.log("Raw response:", rawText);
+
+      if (contentType?.includes("application/json")) {
+        const data = JSON.parse(rawText);
+        setResponseData(data);
+      } else {
+        console.error("Unexpected response type:", contentType);
+      }
+    } catch (error) {
+      console.error("Error generating agreement:", error);
+    }
+  };
+
+  // Poll the agreement status every second
+  useEffect(() => {
+    const intervalId = setInterval(fetchAgreementStatus, 1000);
+
+    // Cleanup the interval when component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div>
@@ -67,14 +134,89 @@ const Chatroom = () => {
 
           {/* Bottom controls */}
           <div className="flex flex-row items-center justify-center p-4 w-full mt-10 h-full">
-            <div className="flex justify-center items-center w-1/2  h-full border-amber-50 border flex-col gap-32">
+            <div className="flex justify-center items-center w-1/2 h-full border-amber-50 border flex-col gap-32">
               <h1 className="text-4xl font-bold">Rental agreement</h1>
-              <p className="font-thin text-3xl flex text-center justify-center px-16">
-                You hadn’t generated any agreements yet.
-              </p>
-              <button className="border border-white rounded-lg  text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]">
-                Generate
-              </button>
+
+              {responseData?.status === "NotInitiated" && (
+                <div className="flex flex-col items-center justify-center space-y-10 ">
+                  <p className="font-thin text-3xl flex text-center justify-center px-16">
+                    You hadn’t generated any agreements yet.
+                  </p>
+                  <button
+                    className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]"
+                    onClick={generateCall}
+                  >
+                    Generate
+                  </button>
+                </div>
+              )}
+
+              {responseData?.status?.Initiated && (
+                <div className="flex flex-col items-center justify-center">
+                  <p className="font-thin text-3xl flex text-center justify-center px-16">
+                    <span className="font-bold mr-1">You</span>requested to
+                    generate a rental agreement.
+                  </p>
+                  <p className="font-thin text-2xl mt-10 p-5 text-center">
+                    Waiting for confirmation from other party...
+                  </p>
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {responseData?.status === "Rejected" && (
+                <div className="flex flex-col items-center justify-center">
+                  <p className="font-thin text-3xl flex text-center justify-center px-16">
+                    <span className="font-bold mr-1">You</span> requested to
+                    generate a rental agreement.
+                  </p>
+                  <p className="font-thin text-2xl mt-10 text-red-600">
+                    Other party rejected the request
+                  </p>
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                    Generate
+                  </button>
+                </div>
+              )}
+
+              {responseData?.status === "Generated" && (
+                <div className="flex flex-col items-center justify-center">
+                  <p className="font-thin text-3xl flex text-center justify-center px-16">
+                    Rental agreement was generated successfully!
+                  </p>
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]">
+                    View and Sign
+                  </button>
+                </div>
+              )}
+              {responseData?.status === "HalfSigned" && (
+                <div className="flex flex-col items-center justify-center ">
+                  <p className="font-thin text-3xl flex text-center justify-center px-16">
+                    Rental agreement was generated successfully!
+                  </p>
+                  <p className="font-thin text-2xl mt-10 text-green-600 text-center p-5">
+                    Other party already signed the agreement and waits for you!
+                  </p>
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                    View and Sign
+                  </button>
+                </div>
+              )}
+              {responseData?.status === "Signed" && (
+                <div className="flex flex-col items-center justify-center ">
+                  <p className="font-thin text-3xl flex text-center justify-center px-16">
+                    Rental agreement was generated and signed successfully!
+                  </p>
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                    Get PDF
+                  </button>
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                    Get Signed PDF
+                  </button>
+                </div>
+              )}
             </div>
             <div className="flex justify-center items-center w-1/2 text-6xl h-full border-amber-50 border">
               Calendar

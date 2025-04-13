@@ -252,6 +252,7 @@ import { useRouter } from "next/router";
 import { doc, getDoc, getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import Header from "@/components/header";
+import { useUser } from "@/context/context";
 
 
 const featureList = [
@@ -271,9 +272,10 @@ const RentingPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
   const [house, setHouse] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [tenant, setTenant] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [listingId, setListingId] = useState<string | null>(null);
+  const { user } = useUser();
 
 
   const fetchListingIdByUserId = async (targetUserId: string, currentListingId: string) => {
@@ -310,7 +312,7 @@ const RentingPage: React.FC = () => {
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
               const userData = userSnap.data();
-              setUser(userData);
+              setTenant(userData);
               const foundListingId = await fetchListingIdByUserId(userId, id as string);
               setListingId(foundListingId);
             }
@@ -379,15 +381,15 @@ const RentingPage: React.FC = () => {
             <div className="border border-[#ffd700] rounded-xl p-4">
               <div className="flex space-x-4 items-center">
                 <div>
-                  <p className="font-bold">{user?.name}</p>
+                  <p className="font-bold">{tenant?.name}</p>
                   <p className="font-thin">
-                    {user?.successfullrentalsBefore ?? 0} successful rentals before
+                    {tenant?.successfullrentalsBefore ?? 0} successful rentals before
                   </p>
                 </div>
               </div>
             </div>
             <div className="flex space-x-4">
-            <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center" onClick={() => router.push(`/chat/${listingId}_${house.userId}_${user.uid}`)}>
+            <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center" onClick={() => router.push(`/chat/${listingId}_${house.userId}_${user?.uid}`)}>
                 <p>Chat</p>
               </button>
               <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center">
