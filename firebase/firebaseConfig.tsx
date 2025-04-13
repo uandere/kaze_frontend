@@ -1,12 +1,11 @@
-import dotenv from 'dotenv';
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut  } from "firebase/auth";
 import { getFirestore,  collection, addDoc, query, orderBy, onSnapshot, serverTimestamp  } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-dotenv.config();
+
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "kaze-frontend.firebaseapp.com",
   projectId: "kaze-frontend",
   storageBucket: "kaze-frontend.firebasestorage.app",
