@@ -5,7 +5,7 @@ import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  apiKey: "AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU",
   authDomain: "kaze-frontend.firebaseapp.com",
   projectId: "kaze-frontend",
   storageBucket: "kaze-frontend.firebasestorage.app",
