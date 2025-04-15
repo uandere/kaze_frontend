@@ -46,6 +46,7 @@ const Chatroom = () => {
 
   console.log("Chat ID:", info);
 
+
   // Fetch all houses
   useEffect(() => {
     const fetchHouses = async () => {
@@ -137,6 +138,21 @@ const Chatroom = () => {
     // Cleanup the interval when component unmounts
     return () => clearInterval(intervalId);
   }, []);
+
+
+  const handleViewAgreement = () => {
+    if (!info) return;
+  
+    router.push({
+      pathname: "/agreement",
+      query: {
+        listingId: info.listingId,
+        tenant: info.tenant,
+        landlord: info.landlord,
+      },
+    });
+  };
+  
 
   return (
     <div>
@@ -233,7 +249,7 @@ const Chatroom = () => {
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     Rental agreement was generated successfully!
                   </p>
-                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]">
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]" onClick={handleViewAgreement}>
                     View and Sign
                   </button>
                 </div>
