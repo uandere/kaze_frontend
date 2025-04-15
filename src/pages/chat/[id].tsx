@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import Header from "@/components/header";
 import { useRouter } from "next/router";
@@ -14,15 +15,36 @@ const Chatroom = () => {
   const [houses, setHouses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [responseData, setResponseData] = useState<any | null>(null);
+  const [info, setParsedInfo] = useState<{
+    listingId: string;
+    tenant: string;
+    landlord: string;
+  } | null>(null);
 
-  const getPrefix = (id: string | string[] | undefined): string | null => {
-    if (!id) return null;
-    const str = Array.isArray(id) ? id[0] : id;
-    const index = str.indexOf("_");
-    return index !== -1 ? str.substring(0, index) : str;
+  const extractIds = (chatId: string | undefined | string[]) => {
+    if (!chatId || typeof chatId !== "string") {
+      return { listingId: "", tenant: "", landlord: "" };
+    }
+
+    const parts = chatId.split("_");
+    if (parts.length !== 3) {
+      console.warn("Invalid chatId format:", chatId);
+      return { listingId: "", tenant: "", landlord: "" };
+    }
+
+    const [listingId, tenant, landlord] = parts;
+    return { listingId, tenant, landlord };
   };
 
-  const houseId = getPrefix(id);
+  useEffect(() => {
+    if (!id) return; // Wait until router.query.id is available
+
+    const { listingId, tenant, landlord } = extractIds(id as string);
+
+    setParsedInfo({ listingId, tenant, landlord });
+  }, [id]);
+
+  console.log("Chat ID:", info);
 
   // Fetch all houses
   useEffect(() => {
@@ -45,18 +67,21 @@ const Chatroom = () => {
     fetchHouses();
   }, []);
 
-  const matchedHouse = houses.find((house) => house.id === houseId);
+  const matchedHouse = houses.find((house) => house.id === info?.listingId);
 
-
-
-  
+  useEffect(() => {
+    if (!info) return;
+    const intervalId = setInterval(fetchAgreementStatus, 1000);
+    return () => clearInterval(intervalId);
+  }, [info]);
 
   const fetchAgreementStatus = async () => {
+    if (!info) return;
     try {
       const response = await fetch(
-        `https://kazeapi.uk/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${matchedHouse?.id}`
+        `https://kazeapi.uk/agreement/status?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`
       );
-      const data = await response.json(); 
+      const data = await response.json();
       console.log("Agreement Status:", data);
       setResponseData(data);
     } catch (error) {
@@ -72,7 +97,7 @@ const Chatroom = () => {
       console.log("Tenant ID:", tenantId);
       console.log("Matched House:", matchedHouse);
       console.log("Matched House User ID:", matchedHouse?.userId);
-      if (!matchedHouse?.userId || !tenantId) {
+      if (!info?.landlord || !info?.tenant) {
         console.error("Missing landlord_id or tenant_id");
         return;
       }
@@ -84,9 +109,9 @@ const Chatroom = () => {
           Authorization: `Bearer ${jwtToken}`,
         },
         body: JSON.stringify({
-          tenant_id: tenantId,
-          landlord_id: matchedHouse.userId,
-          housing_id: matchedHouse.id,
+          tenant_id: info.tenant,
+          landlord_id: info.landlord,
+          housing_id: info.listingId,
         }),
       });
 
@@ -168,20 +193,25 @@ const Chatroom = () => {
                   </button>
                 </div>
               )}
-              {responseData?.status?.Initiated?.confirmed_by !== user?.uid && (
-                <div>
-                  <p>You are requested to generate a rental agreement.</p>
-                  <p>Do you agree?</p>
-                  <div className="flex flex-row gap-10 mt-10">
-                    <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
-                      Yes
-                    </button>
-                    <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
-                      No
-                    </button>
+              {responseData?.status?.Initiated?.confirmed_by !== user?.uid &&
+                responseData?.status?.Initiated?.confirmed_by !== undefined &&
+                responseData?.status?.Initiated?.confirmed_by !== null && (
+                  <div>
+                    <p>You are requested to generate a rental agreement.</p>
+                    <p>Do you agree?</p>
+                    <div className="flex flex-row gap-10 mt-10">
+                      <button
+                        className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]"
+                        onClick={generateCall}
+                      >
+                        Yes
+                      </button>
+                      <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                        No
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {responseData?.status === "Rejected" && (
                 <div className="flex flex-col items-center justify-center">

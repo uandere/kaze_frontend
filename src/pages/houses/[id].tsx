@@ -249,11 +249,20 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { doc, getDoc, getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+ updateDoc
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import Header from "@/components/header";
 import { useUser } from "@/context/context";
-
 
 const featureList = [
   { key: "isDishwasher", label: "Dishwasher machine" },
@@ -277,15 +286,19 @@ const RentingPage: React.FC = () => {
   const [listingId, setListingId] = useState<string | null>(null);
   const { user } = useUser();
 
-
-  const fetchListingIdByUserId = async (targetUserId: string, currentListingId: string) => {
+  const fetchListingIdByUserId = async (
+    targetUserId: string,
+    currentListingId: string
+  ) => {
     const db = getFirestore();
     const listingsRef = collection(db, "listings");
     const q = query(listingsRef, where("userId", "==", targetUserId));
     try {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        const matchedDoc = querySnapshot.docs.find(doc => doc.id === currentListingId);
+        const matchedDoc = querySnapshot.docs.find(
+          (doc) => doc.id === currentListingId
+        );
         return matchedDoc?.id || null;
       }
     } catch (error) {
@@ -293,7 +306,6 @@ const RentingPage: React.FC = () => {
     }
     return null;
   };
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -313,7 +325,10 @@ const RentingPage: React.FC = () => {
             if (userSnap.exists()) {
               const userData = userSnap.data();
               setTenant(userData);
-              const foundListingId = await fetchListingIdByUserId(userId, id as string);
+              const foundListingId = await fetchListingIdByUserId(
+                userId,
+                id as string
+              );
               setListingId(foundListingId);
             }
           }
@@ -341,7 +356,50 @@ const RentingPage: React.FC = () => {
     listingId: listingId || "",
     landlordId: house.userId,
     tenantId: user?.uid || "",
-  }); 
+  });
+
+  const Create_ChatId = (
+    listingId: string,
+    tenant: string,
+    landlord: string
+  ) => {
+    return `${listingId}_${tenant}_${landlord}`;
+  };
+
+  const extractIds = (chatId: string) => {
+    const [listingId, tenant, landlord] = chatId.split("_");
+    return { listingId, tenant, landlord };
+  };
+
+  const chatID = Create_ChatId(listingId || "", user?.uid || "", house.userId);
+
+
+  const handleClick = async () => {
+    const docRef = doc(db, "chats", chatID);
+
+    try {
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          createdAt: new Date(),
+          landlord_id: house.userId,
+          listing_id: listingId,
+          messages: [],
+          tenant_id: user?.uid, // use uid directly instead of `tenant`, since tenant is user data, not an id
+        });
+        console.log("Updated Firestore.");
+      } else {
+        console.log("Chat does not exist.");
+      }
+
+      router.push(`/chat/${chatID}`);
+    } catch (err) {
+      console.error("Error accessing Firestore:", err);
+      router.push(`/chat/${chatID}`); // Still navigate even if there's an error
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -363,7 +421,9 @@ const RentingPage: React.FC = () => {
             </p>
             <div className="flex flex-row gap-4 text-lg font-thin mt-2">
               {house.firstTimeRental && (
-                <p className="rounded border p-1 flex justify-center">First-time rental</p>
+                <p className="rounded border p-1 flex justify-center">
+                  First-time rental
+                </p>
               )}
               {house.livingComplex && (
                 <p className="rounded border p-1 flex justify-center">
@@ -371,10 +431,14 @@ const RentingPage: React.FC = () => {
                 </p>
               )}
               {house.isPetFriendly && (
-                <p className="rounded border p-1 flex justify-center">Pet-friendly</p>
+                <p className="rounded border p-1 flex justify-center">
+                  Pet-friendly
+                </p>
               )}
               {house.isChildrenFriendly && (
-                <p className="rounded border p-1 flex justify-center">Children-friendly</p>
+                <p className="rounded border p-1 flex justify-center">
+                  Children-friendly
+                </p>
               )}
             </div>
             <div className="flex flex-row gap-6">
@@ -387,13 +451,17 @@ const RentingPage: React.FC = () => {
                 <div>
                   <p className="font-bold">{tenant?.name}</p>
                   <p className="font-thin">
-                    {tenant?.successfullrentalsBefore ?? 0} successful rentals before
+                    {tenant?.successfullrentalsBefore ?? 0} successful rentals
+                    before
                   </p>
                 </div>
               </div>
             </div>
             <div className="flex space-x-4">
-            <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center" onClick={() => router.push(`/chat?${params.toString()}`)}>
+              <button
+                className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center"
+                onClick={handleClick}
+              >
                 <p>Chat</p>
               </button>
               <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center">
@@ -405,7 +473,9 @@ const RentingPage: React.FC = () => {
 
         <section className="flex flex-row p-20">
           <div className="w-1/2">
-            <h3 className="text-3xl font-bold flex justify-center">Description</h3>
+            <h3 className="text-3xl font-bold flex justify-center">
+              Description
+            </h3>
             <p className="font-thin text-sm">{house.description}</p>
             <h3 className="text-3xl font-bold flex justify-center">Details</h3>
             <div className="grid grid-cols-3 gap-4 mt-8 font-bold">
@@ -422,10 +492,14 @@ const RentingPage: React.FC = () => {
                   )
               )}
             </div>
-            <h3 className="text-3xl font-bold flex justify-center">Amenities</h3>
+            <h3 className="text-3xl font-bold flex justify-center">
+              Amenities
+            </h3>
             <div className="flex flex-row gap-4 mb-6 items-center mt-8 font-bold">
               <img src="/parking.svg" alt="Parking" width={30} />
-              <p>Parking lot: <span className="text-green-500">available</span></p>
+              <p>
+                Parking lot: <span className="text-green-500">available</span>
+              </p>
             </div>
             <a href="/marketsNearby">
               <div className="flex flex-row gap-4 mb-6 items-center font-bold">
