@@ -47,15 +47,18 @@ const Chatroom = () => {
 
   const matchedHouse = houses.find((house) => house.id === houseId);
 
-  // Function to fetch agreement status
+
+
+  
+
   const fetchAgreementStatus = async () => {
     try {
       const response = await fetch(
-        `https://kazeapi.uk/agreement/status?tenant_id=${user?.uid}&landlord_id=${matchedHouse?.userId}&housing_id=${matchedHouse?.id}`
+        `https://kazeapi.uk/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${matchedHouse?.id}`
       );
-      const data = await response.json(); //{ status: "Signed" };
+      const data = await response.json(); 
       console.log("Agreement Status:", data);
-      setResponseData(data); // Optionally store the response data
+      setResponseData(data);
     } catch (error) {
       console.error("Error fetching agreement status:", error);
     }
@@ -151,7 +154,7 @@ const Chatroom = () => {
                 </div>
               )}
 
-              {responseData?.status?.Initiated && (
+              {responseData?.status?.Initiated?.confirmed_by === user?.uid && (
                 <div className="flex flex-col items-center justify-center">
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     <span className="font-bold mr-1">You</span>requested to
@@ -163,6 +166,20 @@ const Chatroom = () => {
                   <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
                     Cancel
                   </button>
+                </div>
+              )}
+              {responseData?.status?.Initiated?.confirmed_by !== user?.uid && (
+                <div>
+                  <p>You are requested to generate a rental agreement.</p>
+                  <p>Do you agree?</p>
+                  <div className="flex flex-row gap-10 mt-10">
+                    <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                      Yes
+                    </button>
+                    <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                      No
+                    </button>
+                  </div>
                 </div>
               )}
 

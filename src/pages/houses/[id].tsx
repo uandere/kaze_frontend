@@ -337,7 +337,11 @@ const RentingPage: React.FC = () => {
   const encodedAddress = encodeURIComponent(
     `${house?.city}, ${house?.street}, ${house?.houseNumber}`
   );
-
+  const params = new URLSearchParams({
+    listingId: listingId || "",
+    landlordId: house.userId,
+    tenantId: user?.uid || "",
+  }); 
   return (
     <div className="min-h-screen">
       <Header />
@@ -389,7 +393,7 @@ const RentingPage: React.FC = () => {
               </div>
             </div>
             <div className="flex space-x-4">
-            <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center" onClick={() => router.push(`/chat/${listingId}_${house.userId}_${user?.uid}`)}>
+            <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center" onClick={() => router.push(`/chat?${params.toString()}`)}>
                 <p>Chat</p>
               </button>
               <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center">
