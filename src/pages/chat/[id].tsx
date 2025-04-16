@@ -20,6 +20,7 @@ const Chatroom = () => {
     tenant: string;
     landlord: string;
   } | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const extractIds = (chatId: string | undefined | string[]) => {
     if (!chatId || typeof chatId !== "string") {
@@ -154,10 +155,39 @@ const Chatroom = () => {
   };
   
 
+
+  const fetchAgreement = async () => {
+    if (!info?.tenant || !info?.landlord || !info?.listingId || !user) return;
+  
+    try {
+      setLoading(true);
+      const token = await user.getIdToken();
+      const url = `https://kazeapi.uk/agreement/get?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`;
+  
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!res.ok) throw new Error("Failed to fetch agreement");
+  
+      const blob = await res.blob();
+      const pdfBlobUrl = URL.createObjectURL(blob);
+      setPdfUrl(pdfBlobUrl);
+    } catch (err) {
+      console.error("Error fetching agreement:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   return (
     <div>
       <Header />
-      <div className="flex flex-row w-screen min-h-screen">
+      <div className="flex flex-row w-screen h-full">
         {/* Left Side */}
         <div className="flex w-1/2 justify-center items-center text-6xl">
           Chat
@@ -254,7 +284,8 @@ const Chatroom = () => {
                   </button>
                 </div>
               )}
-              {responseData?.status === "HalfSigned" && (
+              {responseData?.status?.HalfSigned?.signed_by !== user?.uid && responseData?.status?.HalfSigned?.signed_by !== undefined &&
+                responseData?.status?.HalfSigned?.signed_by !== null &&(
                 <div className="flex flex-col items-center justify-center ">
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     Rental agreement was generated successfully!
@@ -262,7 +293,7 @@ const Chatroom = () => {
                   <p className="font-thin text-2xl mt-10 text-green-600 text-center p-5">
                     Other party already signed the agreement and waits for you!
                   </p>
-                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]" onClick={handleViewAgreement}>
                     View and Sign
                   </button>
                 </div>
@@ -272,7 +303,7 @@ const Chatroom = () => {
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     Rental agreement was generated and signed successfully!
                   </p>
-                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]" onClick={fetchAgreement}>
                     Get PDF
                   </button>
                   <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
@@ -287,6 +318,11 @@ const Chatroom = () => {
           </div>
         </div>
       </div>
+      {pdfUrl && (<iframe
+        src={pdfUrl}
+        style={{ width: "100%", height: "90%" }}
+        title="Rental Agreement"
+      />)}
     </div>
   );
 };
