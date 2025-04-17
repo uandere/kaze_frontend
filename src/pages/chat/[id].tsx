@@ -47,7 +47,6 @@ const Chatroom = () => {
 
   console.log("Chat ID:", info);
 
-
   // Fetch all houses
   useEffect(() => {
     const fetchHouses = async () => {
@@ -140,10 +139,9 @@ const Chatroom = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-
   const handleViewAgreement = () => {
     if (!info) return;
-  
+
     router.push({
       pathname: "/agreement",
       query: {
@@ -153,41 +151,43 @@ const Chatroom = () => {
       },
     });
   };
-  
 
-
-  const fetchAgreement = async () => {
+  const seePDF = async () => {
     if (!info?.tenant || !info?.landlord || !info?.listingId || !user) return;
-  
+
     try {
       setLoading(true);
       const token = await user.getIdToken();
       const url = `https://kazeapi.uk/agreement/get?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`;
-  
+
       const res = await fetch(url, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (!res.ok) throw new Error("Failed to fetch agreement");
-  
+
       const blob = await res.blob();
       const pdfBlobUrl = URL.createObjectURL(blob);
-      setPdfUrl(pdfBlobUrl);
+
+      // Store it temporarily
+      localStorage.setItem("pdfBlobUrl", pdfBlobUrl);
+
+      // Redirect
+      router.push("/preview");
     } catch (err) {
       console.error("Error fetching agreement:", err);
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <div>
       <Header />
-      <div className="flex flex-row w-screen h-full">
+      <div className="flex flex-row w-screen h-full min-h-screen">
         {/* Left Side */}
         <div className="flex w-1/2 justify-center items-center text-6xl">
           Chat
@@ -208,7 +208,7 @@ const Chatroom = () => {
 
           {/* Bottom controls */}
           <div className="flex flex-row items-center justify-center p-4 w-full mt-10 h-full">
-            <div className="flex justify-center items-center w-1/2 h-full border-amber-50 border flex-col gap-32">
+            <div className="flex justify-center items-center w-1/2 h-full bg-[#131314] rounded-lg flex-col gap-32">
               <h1 className="text-4xl font-bold">Rental agreement</h1>
 
               {responseData?.status === "NotInitiated" && (
@@ -217,7 +217,7 @@ const Chatroom = () => {
                     You hadn’t generated any agreements yet.
                   </p>
                   <button
-                    className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]"
+                    className=" bg-[#2c2c2c] rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]"
                     onClick={generateCall}
                   >
                     Generate
@@ -242,17 +242,19 @@ const Chatroom = () => {
               {responseData?.status?.Initiated?.confirmed_by !== user?.uid &&
                 responseData?.status?.Initiated?.confirmed_by !== undefined &&
                 responseData?.status?.Initiated?.confirmed_by !== null && (
-                  <div>
-                    <p>You are requested to generate a rental agreement.</p>
+                  <div className="flex flex-col items-center justify-center gap-10 text-3xl">
+                    <p className=" text-center">
+                      You are requested to generate a rental agreement.
+                    </p>
                     <p>Do you agree?</p>
-                    <div className="flex flex-row gap-10 mt-10">
+                    <div className="flex flex-row gap-10 justify-center">
                       <button
                         className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]"
                         onClick={generateCall}
                       >
                         Yes
                       </button>
-                      <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
+                      <button className="text-red-600 border border-red-600 rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
                         No
                       </button>
                     </div>
@@ -275,25 +277,49 @@ const Chatroom = () => {
               )}
 
               {responseData?.status === "Generated" && (
-                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center gap-16">
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     Rental agreement was generated successfully!
                   </p>
-                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]" onClick={handleViewAgreement}>
+                  <button
+                    className="border border-white rounded-lg text-3xl px-4 py-2 mt-4 hover:border-[#ffd700] hover:text-[#ffd700]"
+                    onClick={handleViewAgreement}
+                  >
                     View and Sign
                   </button>
                 </div>
               )}
-              {responseData?.status?.HalfSigned?.signed_by !== user?.uid && responseData?.status?.HalfSigned?.signed_by !== undefined &&
-                responseData?.status?.HalfSigned?.signed_by !== null &&(
+              {responseData?.status?.HalfSigned?.signed_by !== user?.uid &&
+                responseData?.status?.HalfSigned?.signed_by !== undefined &&
+                responseData?.status?.HalfSigned?.signed_by !== null && (
+                  <div className="flex flex-col items-center justify-center ">
+                    <p className="font-thin text-3xl flex text-center justify-center px-16">
+                      Rental agreement was generated successfully!
+                    </p>
+                    <p className="font-thin text-2xl mt-10 text-green-600 text-center p-5 ">
+                      Other party already signed the agreement and waits for
+                      you!
+                    </p>
+                    <button
+                      className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]"
+                      onClick={handleViewAgreement}
+                    >
+                      View and Sign
+                    </button>
+                  </div>
+                )}
+              {responseData?.status?.HalfSigned?.signed_by === user?.uid && (
                 <div className="flex flex-col items-center justify-center ">
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     Rental agreement was generated successfully!
                   </p>
-                  <p className="font-thin text-2xl mt-10 text-green-600 text-center p-5">
-                    Other party already signed the agreement and waits for you!
+                  <p className="font-thin text-2xl mt-10 text-green-600 text-center p-5 ">
+                    You already signed the agreement and wait for other party!
                   </p>
-                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]" onClick={handleViewAgreement}>
+                  <button
+                    className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]"
+                    onClick={handleViewAgreement}
+                  >
                     View and Sign
                   </button>
                 </div>
@@ -303,7 +329,10 @@ const Chatroom = () => {
                   <p className="font-thin text-3xl flex text-center justify-center px-16">
                     Rental agreement was generated and signed successfully!
                   </p>
-                  <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]" onClick={fetchAgreement}>
+                  <button
+                    className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]"
+                    onClick={seePDF}
+                  >
                     Get PDF
                   </button>
                   <button className="border border-white rounded-lg text-3xl px-4 py-2 mt-10 hover:border-[#ffd700] hover:text-[#ffd700]">
@@ -318,11 +347,6 @@ const Chatroom = () => {
           </div>
         </div>
       </div>
-      {pdfUrl && (<iframe
-        src={pdfUrl}
-        style={{ width: "100%", height: "90%" }}
-        title="Rental Agreement"
-      />)}
     </div>
   );
 };

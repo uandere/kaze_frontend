@@ -148,7 +148,7 @@ const SharingLinkFetcher: React.FC = () => {
               Please, verify your profile using Diia
             </h1>
             <h2 className="text-4xl font-thin">
-              Scan this QR-code using or click it
+              Scan this QR-code with Diia in-app scaner or just click on it
             </h2>
             <a href={responseData.deeplink}>
               <QRCode

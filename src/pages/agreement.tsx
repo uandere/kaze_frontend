@@ -56,10 +56,9 @@ const AgreementPage = () => {
 
   return (
     <div style={{ height: "100vh" }}>
-      <h1>Agreement</h1>
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={handleRedirectToSign}>Sign with Diia</button>
-        <button>I’ll sign by hand ✍</button>
+      <div className="mb-1 р-32 flex justify-center gap-10">
+        <button onClick={handleRedirectToSign} className="text-3xl border p-5 rounded-lg flex flex-row gap-5 justify-center items-center"><p>Sign with</p><img src="DiiaSignature_W.svg" className="h-10 pt-1"/></button>
+        <button className="text-3xl border rounded-lg p-5">I’ll sign by hand </button>
       </div>
       <iframe
         src={pdfUrl}

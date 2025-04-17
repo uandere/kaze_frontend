@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useUser } from "@/context/context";
 import QRCode from "react-qr-code";
+import Header from "@/components/header";
 
 const SignPage = () => {
   const router = useRouter();
@@ -20,21 +21,24 @@ const SignPage = () => {
       try {
         const token = await user.getIdToken();
         const response = await fetch(
-            `https://kazeapi.uk/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          `https://kazeapi.uk/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (response.ok) {
           const data = await response.json();
           // Assuming the response contains a "status" field.
-          if (data.status === "HalfSigned" || data.status === "Signed") {
+          if (
+            data.status?.HalfSigned?.signed_by === "HalfSigned" ||
+            data.status === "Signed"
+          ) {
             // Chat ID is built using the format: landlord_listingId_tenant.
-            const chatId = `${landlord}_${listingId}_${tenant}`;
+            const chatId = `${listingId}_${tenant}_${landlord}`;
             router.push(`/chat/${chatId}`);
           }
         }
@@ -80,36 +84,42 @@ const SignPage = () => {
   // Manual redirection in case polling fails.
   const redirectToChat = () => {
     if (!tenant || !landlord || !listingId) return;
-    const chatId = `${landlord}_${listingId}_${tenant}`;
+    const chatId = `${listingId}_${tenant}_${landlord}`;
     router.push(`/chat/${chatId}`);
   };
 
   if (error) return <div>Invalid request or signing failed.</div>;
 
   return (
-      <div className="flex flex-col items-center gap-6">
-        <h2 className="text-xl font-semibold">Scan this QR to sign</h2>
+    <div className="flex flex-col items-center justify-center gap-6 min-h-screen">
+      <Header />
+      <div className="flex flex-col items-center justify-center mt-20 text-6xl  gap-16">
+        <h1 className="font-bold">Sign the document with Diia.Signature</h1>
+        <p className="font-thin">Open the Diia and scan QR-code with in-app scaner</p>
+
         {deeplink ? (
-            <QRCode
-                value={deeplink}
-                className="border-[5px] border-[#ffd700] rounded"
-                size={360}
-            />
+          <QRCode
+            value={deeplink}
+            className="border-[5px] border-[#ffd700] rounded"
+            size={360}
+          />
         ) : (
-            <p>Generating QR code...</p>
+          <p>Generating QR code...</p>
         )}
         <div className="mt-4 text-center">
           <p className="text-sm">
-            If auto-redirection doesn’t happen (or if your device is being stubborn),
+            If auto-redirection doesn’t happen (or if your device is being
+            stubborn),
             <span
-                className="text-blue-500 underline cursor-pointer ml-1"
-                onClick={redirectToChat}
+              className="text-blue-500 underline cursor-pointer ml-1"
+              onClick={redirectToChat}
             >
-            click here to go to your chat.
-          </span>
+              click here to go to your chat.
+            </span>
           </p>
         </div>
       </div>
+    </div>
   );
 };
 

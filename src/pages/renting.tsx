@@ -199,8 +199,8 @@ const HousesPage: React.FC = () => {
               </div>
               <div className="flex flex-row items-center space-x-4 w-full">
                 <select className="p-3 border rounded bg-gray-800 border-gray-800 w-1/3 text-white">
-                  <option value="Ч">UAH</option>
                   <option>All filters</option>
+                  <option value="Ч">UAH</option>
                   <option value="Ж">USD</option>
                   <option value="Ч">EUR</option>
                 </select>
@@ -272,7 +272,8 @@ const HousesPage: React.FC = () => {
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
                 src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv+${encodeURIComponent(
-                  selectedAddress || "https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv"
+                  selectedAddress ||
+                    "https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv"
                 )}`}
               />
             </div>

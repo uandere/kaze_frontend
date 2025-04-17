@@ -90,7 +90,7 @@ const SignIn = () => {
             onClick={() => handleNavigate("/diiaAuth")}
             className="mt-4 text-2xl bg-[#131314] text-white p-1 rounded-lg flex flex-row items-center justify-center gap-10 px-16 border"
           >
-            <img src="/diia.svg" />
+            <img src="/diiaStroke.svg" width={"24px"} />
             Verificate using Diia
           </button>
           <button className="text-[#ffd700] underline text-xl" onClick={()=>handleNavigate("/")}>No, take me to the home page</button>
