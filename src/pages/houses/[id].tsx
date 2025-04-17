@@ -393,10 +393,24 @@ const RentingPage: React.FC = () => {
         console.log("Chat does not exist.");
       }
 
-      router.push(`/chat/${chatID}`);
+      router.push({
+        pathname: `/chat`,
+        query: {
+          listing_id: listingId,
+          tenant_id: user?.uid,
+          landlord_id: house.userId,
+        },
+      });
     } catch (err) {
       console.error("Error accessing Firestore:", err);
-      router.push(`/chat/${chatID}`); // Still navigate even if there's an error
+      router.push({
+        pathname: `/chat`,
+        query: {
+          listing_id: listingId,
+          tenant_id: user?.uid,
+          landlord_id: house.userId,
+        },
+      }); // Still navigate even if there's an error
     }
   };
 

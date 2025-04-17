@@ -9,7 +9,7 @@ import { useUser } from "../../context/context";
 
 const Chatroom = () => {
   const router = useRouter();
-  const { id } = router.query;
+  const { listing_id, tenant_id, landlord_id } = router.query;
   const { user } = useUser();
 
   const [houses, setHouses] = useState<any[]>([]);
@@ -38,12 +38,15 @@ const Chatroom = () => {
   };
 
   useEffect(() => {
-    if (!id) return; // Wait until router.query.id is available
-
-    const { listingId, tenant, landlord } = extractIds(id as string);
-
-    setParsedInfo({ listingId, tenant, landlord });
-  }, [id]);
+    if (listing_id && tenant_id && landlord_id) {
+      setParsedInfo({
+        listingId: listing_id as string,
+        tenant: tenant_id as string,
+        landlord: landlord_id as string,
+      });
+    }
+  }, [listing_id, tenant_id, landlord_id]);
+  
 
   console.log("Chat ID:", info);
 
