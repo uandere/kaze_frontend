@@ -50,7 +50,6 @@ const Chatroom = () => {
 
   console.log("Chat ID:", info);
 
-  // Fetch all houses
   useEffect(() => {
     const fetchHouses = async () => {
       try {

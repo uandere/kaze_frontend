@@ -2,8 +2,8 @@ import React from "react";
 //import Footer from "@/components/footer/footer";
 import Header from "@/components/header";
 import PropertyCard from "@/components/estateCard";
-// import { useUser } from "../context/UserContext";
-// import PopoutWindow from "@/components/Popout";
+import { useUser } from "@/context/context";
+import PopoutWindow from "@/components/popout";
 import { useState, useEffect } from "react";
 //import MobileSidebar from "@/components/mobileHeader";
 import data from "../../public/data.json"; // Adjust the path as necessary
@@ -25,7 +25,7 @@ function useIsMobile(breakpoint = 768) {
 }
 
 const Index = () => {
-  // const { user, isAuthViaDiia } = useUser();
+  const { user,  diiaAuth } = useUser();
   const isMobile = useIsMobile();
 
   return (
@@ -33,7 +33,7 @@ const Index = () => {
       {/* Header or Mobile Sidebar */}
       {/* {!isMobile ? <Header /> : <MobileSidebar />} */}
       <Header/>
-      {/* {!isAuthViaDiia ? <PopoutWindow /> : null} */}
+      {!diiaAuth ? <PopoutWindow /> : null}
 
       {/* Main Content */}
       <div className="bg-black h-screen md:relative">

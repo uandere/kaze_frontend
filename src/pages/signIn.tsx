@@ -15,7 +15,7 @@ const SignIn = () => {
       const result = await signInWithPopup(auth, provider);
       setUser(result.user);
 
-      router.push("/diiaAuth");
+      router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("Error signing in with Google: ", err.message);
@@ -90,9 +90,10 @@ const SignIn = () => {
             onClick={() => handleNavigate("/diiaAuth")}
             className="mt-4 text-2xl bg-[#131314] text-white p-1 rounded-lg flex flex-row items-center justify-center gap-10 px-16 border"
           >
-            <img src="/diiaStroke.svg" width={"24px"} />
+            <img src="/diiaStroke.svg" width={"28px"} />
             Verificate using Diia
           </button>
+          <p className="text-xl font-thin w-1/2 text-center border border-[#ffd700] rounded-2xl p-5"> Sending copies of your passport and tax ID will allow you to conclude contracts, book apartment inspections and exhibit your own objects on the platform</p>
           <button className="text-[#ffd700] underline text-xl" onClick={()=>handleNavigate("/")}>No, take me to the home page</button>
           <button
             onClick={HandleLogout}
