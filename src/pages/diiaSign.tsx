@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/context/context";
 import QRCode from "react-qr-code";
 import Header from "@/components/header";
+import Timer from "@/components/timer";
 
 const SignPage = () => {
   const router = useRouter();
@@ -96,6 +97,7 @@ const SignPage = () => {
       <div className="flex flex-col items-center justify-center mt-20 text-6xl  gap-16">
         <h1 className="font-bold">Sign the document with Diia.Signature</h1>
         <p className="font-thin">Open the Diia and scan QR-code with in-app scaner</p>
+        <Timer />
 
         {deeplink ? (
           <QRCode

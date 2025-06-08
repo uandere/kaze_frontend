@@ -11,7 +11,7 @@ const Chatroom = () => {
   const router = useRouter();
   const { listing_id, tenant_id, landlord_id } = router.query;
   const { user } = useUser();
-
+  const [isDiiaAuthenticated, setIsDiiaAuthenticated] = useState(false);
   const [houses, setHouses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [responseData, setResponseData] = useState<any | null>(null);
@@ -21,6 +21,8 @@ const Chatroom = () => {
     landlord: string;
   } | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  
 
   const extractIds = (chatId: string | undefined | string[]) => {
     if (!chatId || typeof chatId !== "string") {
@@ -36,6 +38,37 @@ const Chatroom = () => {
     const [listingId, tenant, landlord] = parts;
     return { listingId, tenant, landlord };
   };
+
+  useEffect(() => {
+    const checkDiiaAuth = async () => {
+      if (user) {
+        try {
+          // Get the Firebase JWT token (ID Token)
+          const idToken = await user.getIdToken();
+
+          // Send the JWT token as Authorization Bearer token to the Diia API
+          const authResponse = await fetch(
+            `https://kazeapi.uk/user/is_authorized?id=${user.uid}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${idToken}`, // Use JWT token here
+              },
+            }
+          );
+          
+          const data = await authResponse.json();
+          setIsDiiaAuthenticated(data.isAuthorized); // Assuming the response contains `isAuthorized`
+        } catch (error) {
+          console.error("Error checking Diia authentication:", error);
+        }
+      }
+    };
+
+    if (user) {
+      checkDiiaAuth(); // Check Diia auth after the user is logged in
+    }
+  }, [user]);
 
   useEffect(() => {
     if (listing_id && tenant_id && landlord_id) {

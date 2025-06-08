@@ -248,6 +248,7 @@
 // export default RentingPage;
 
 import React, { useEffect, useState } from "react";
+import useDiiaAuth from "@/hooks/isAuthorized";
 import { useRouter } from "next/router";
 import {
   doc,
@@ -258,7 +259,7 @@ import {
   where,
   getDocs,
   setDoc,
- updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import Header from "@/components/header";
@@ -278,6 +279,7 @@ const featureList = [
 ];
 
 const RentingPage: React.FC = () => {
+  const isDiiaAuthenticated = useDiiaAuth();
   const router = useRouter();
   const { id } = router.query;
   const [house, setHouse] = useState<any>(null);
@@ -285,6 +287,7 @@ const RentingPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [listingId, setListingId] = useState<string | null>(null);
   const { user } = useUser();
+  console.log(isDiiaAuthenticated);
 
   const fetchListingIdByUserId = async (
     targetUserId: string,
@@ -373,7 +376,6 @@ const RentingPage: React.FC = () => {
 
   const chatID = Create_ChatId(listingId || "", user?.uid || "", house.userId);
 
-
   const handleClick = async () => {
     const docRef = doc(db, "chats", chatID);
 
@@ -386,21 +388,28 @@ const RentingPage: React.FC = () => {
           landlord_id: house.userId,
           listing_id: listingId,
           messages: [],
-          tenant_id: user?.uid, // use uid directly instead of `tenant`, since tenant is user data, not an id
+          tenant_id: user?.uid,
         });
         console.log("Updated Firestore.");
       } else {
         console.log("Chat does not exist.");
       }
-
-      router.push({
-        pathname: `/chat`,
-        query: {
-          listing_id: listingId,
-          tenant_id: user?.uid,
-          landlord_id: house.userId,
-        },
-      });
+      if (!isDiiaAuthenticated){
+        router.push({
+          pathname: "/signIn",
+          query: { backlink: router.asPath },
+        });
+      } else {
+        router.push({
+          pathname: `/chat`,
+          query: {
+            listing_id: listingId,
+            tenant_id: user?.uid,
+            landlord_id: house.userId,
+          },
+        });
+      }
+      
     } catch (err) {
       console.error("Error accessing Firestore:", err);
       router.push({
@@ -410,7 +419,7 @@ const RentingPage: React.FC = () => {
           tenant_id: user?.uid,
           landlord_id: house.userId,
         },
-      }); // Still navigate even if there's an error
+      });
     }
   };
 

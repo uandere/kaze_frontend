@@ -55,14 +55,23 @@ const AgreementPage = () => {
   if (!pdfUrl) return <div>No agreement available.</div>;
 
   return (
-    <div style={{ height: "100vh" }}>
-      <div className="mb-1 р-32 flex justify-center gap-10">
-        <button onClick={handleRedirectToSign} className="text-3xl border p-5 rounded-lg flex flex-row gap-5 justify-center items-center"><p>Sign with</p><img src="DiiaSignature_W.svg" className="h-10 pt-1"/></button>
-        <button className="text-3xl border rounded-lg p-5">I’ll sign by hand </button>
+    <div style={{ height: "100vh", position: "relative" }}>
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 flex justify-center gap-10">
+        <button
+          onClick={handleRedirectToSign}
+          className="text-3xl border p-5 rounded-lg flex flex-row gap-5 justify-center items-center bg-black bg-opacity-80 shadow-lg"
+        >
+          <p>Sign with</p>
+          <img src="DiiaSignature_W.svg" className="h-10 pt-1" />
+        </button>
+        <button className="text-3xl border rounded-lg p-5 bg-black bg-opacity-80 shadow-lg">
+          I’ll sign by hand
+        </button>
       </div>
+
       <iframe
         src={pdfUrl}
-        style={{ width: "100%", height: "90%" }}
+        style={{ width: "100%", height: "100%" }}
         title="Rental Agreement"
       />
     </div>

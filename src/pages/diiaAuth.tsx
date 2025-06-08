@@ -5,47 +5,52 @@ import Header from "@/components/header";
 import { useRouter } from "next/router";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
+import Timer from "@/components/timer";
+import Image from "next/image";
 
 const SharingLinkFetcher: React.FC = () => {
   const { user } = useUser();
   const router = useRouter();
+  const backlink = router.query.backlink as string
+
   const [responseData, setResponseData] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [authorized, setAuthorized] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
+  const [isDiiaAuth, setIsDiiaAuth] = useState<boolean>(false);
+  
 
   const fetchSharingLink = async () => {
-    if (user) {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = await user.getIdToken();
-        const response = await fetch(
-          "https://kazeapi.uk/user/get_sharing_link",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch sharing link. Status: ${response.status}`
-          );
-        }
-        const data = await response.json();
-        setResponseData(data);
-      } catch (error) {
-        console.error("Error fetching sharing link:", error);
-        setError("Failed to fetch sharing link. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    } else {
+    if (!user) {
       setError("You must be logged in to fetch the sharing link.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = await user.getIdToken();
+      console.log("Token:", token);
+      const response = await fetch("https://kazeapi.uk/user/get_sharing_link", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResponseData(data);
+    } catch (error) {
+      console.error("Error fetching sharing link:", error);
+      setError("Failed to fetch sharing link. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,42 +60,36 @@ const SharingLinkFetcher: React.FC = () => {
         doc(db, "users", uid),
         {
           uid,
-          name,
           role: "tenant",
         },
         { merge: true }
       );
-      console.log("User saved to Firestore (merged as tenant)");
     } catch (error) {
       console.error("Error saving user to Firestore:", error);
     }
   };
 
   const becomeLandlord = async () => {
-    if (user) {
-      try {
-        await updateDoc(doc(db, "users", user.uid), {
-          role: "landlord",
-        });
-        console.log("User updated to landlord");
-        router.push("/profile");
-      } catch (error) {
-        console.error("Error updating user role:", error);
-      }
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        role: "landlord",
+      });
+      router.push(backlink || "/");
+    } catch (error) {
+      console.error("Error updating user role:", error);
     }
   };
 
   const becomeTenant = async () => {
-    if (user) {
-      try {
-        await updateDoc(doc(db, "users", user.uid), {
-          role: "tenant",
-        });
-        console.log("User updated to tenant");
-        router.push("/profile");
-      } catch (error) {
-        console.error("Error updating user role to tenant:", error);
-      }
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        role: "tenant",
+      });
+      router.push(backlink || "/");
+    } catch (error) {
+      console.error("Error updating user role:", error);
     }
   };
 
@@ -99,28 +98,52 @@ const SharingLinkFetcher: React.FC = () => {
 
     const checkAuthorization = async () => {
       if (!user) return;
+
       try {
         const idToken = await user.getIdToken();
-        const response = await fetch(
+
+        const authResponse = await fetch(
           `https://kazeapi.uk/user/is_authorized?id=${user.uid}`,
           {
+            method: "GET",
             headers: {
               Authorization: `Bearer ${idToken}`,
             },
           }
         );
-        console.log("Authorization response:", response);
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.name) {
-            setAuthorized(true);
-            setUserName(data.name);
-            await saveUserToFirestore(user.uid, data.name);
-            clearInterval(interval);
+
+        if (authResponse.ok) {
+          const authData = await authResponse.json();
+          console.log("Authorization Data:", authData);
+          setIsDiiaAuth(authData?.result === true);
+
+          if (authData?.result === true) {
+            const nameResponse = await fetch(
+              `https://kazeapi.uk/user/name?id=${user.uid}`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${idToken}`,
+                },
+              }
+            );
+
+            if (nameResponse.ok) {
+              const nameData = await nameResponse.json();
+              const name = nameData.name;
+              setUserName(name);
+
+              await saveUserToFirestore(user.uid, name);
+
+              clearInterval(interval);
+            }
           }
+        } else {
+          setIsDiiaAuth(false);
         }
       } catch (err) {
         console.error("Authorization check failed:", err);
+        setIsDiiaAuth(false);
       }
     };
 
@@ -128,11 +151,15 @@ const SharingLinkFetcher: React.FC = () => {
       interval = setInterval(checkAuthorization, 1000);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [user]);
 
   useEffect(() => {
-    fetchSharingLink();
+    if (user) {
+      fetchSharingLink();
+    }
   }, [user]);
 
   return (
@@ -140,49 +167,48 @@ const SharingLinkFetcher: React.FC = () => {
       <Header />
       <div className="mt-20 text-center">
         {loading && <p>Loading...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p className="text-red-500">{error}</p>}
 
-        {!authorized && responseData?.deeplink && (
-          <div className="flex  justify-center items-center flex-col h-[90vh] gap-10">
+        {!user || !isDiiaAuth ? (
+          <div className="flex flex-col justify-center items-center h-[90vh] gap-10">
             <h1 className="text-6xl font-bold">
               Please, verify your profile using Diia
             </h1>
             <h2 className="text-4xl font-thin">
-              Scan this QR-code with Diia in-app scaner or just click on it
+              Scan this QR-code with Diia in-app scanner or just click on it
             </h2>
-            <a href={responseData.deeplink}>
+            <Timer />
+            <a href={responseData?.deeplink}>
               <QRCode
-                value={responseData.deeplink}
+                value={responseData?.deeplink || ""}
                 className="border-[5px] border-[#ffd700] rounded"
                 size={360}
               />
             </a>
-
             <a
-              className="underlined text-2xl font-thin underline text-[#ffd700]"
+              className="underline text-2xl font-thin text-[#ffd700]"
               href="/"
             >
               No, take me to the home page
             </a>
           </div>
-        )}
-
-        {authorized && (
-          <div className="space-x-4 flex  justify-center items-center flex-col h-[90vh] gap-10">
+        ) : (
+          <div className="flex flex-col justify-center items-center h-[90vh] gap-10">
             <h1 className="text-4xl font-bold">Sign In as:</h1>
             <div className="flex flex-row gap-4">
               <button
-                className="bg-[#1c1c1d] text-white px-4 py-2  w-80 h-80 rounded-3xl flex flex-col items-center justify-center hover:border-[#ffd700] hover:border-2"
                 onClick={becomeTenant}
+                className="bg-[#1c1c1d] text-white px-4 py-2 w-80 h-80 rounded-3xl flex flex-col items-center justify-center hover:border-[#ffd700] hover:border-2"
               >
-                <img src="/search.svg" width={202}/>
+                <Image src="/search.svg" width={202} height={202} alt="Tenant Icon" />
+
                 <p className="text-2xl font-thin">As Tenant</p>
               </button>
               <button
-                className="bg-[#1c1c1d] text-white px-4 py-2  w-80 h-80 rounded-3xl flex flex-col items-center justify-center hover:border-[#ffd700] hover:border-2"
                 onClick={becomeLandlord}
+                className="bg-[#1c1c1d] text-white px-4 py-2 w-80 h-80 rounded-3xl flex flex-col items-center justify-center hover:border-[#ffd700] hover:border-2"
               >
-                <img src="/landlord.svg" />
+                 <Image src="/landlord.svg" width={202} height={202} alt="Tenant Icon" />
                 <p className="text-2xl font-thin">As Landlord</p>
               </button>
             </div>

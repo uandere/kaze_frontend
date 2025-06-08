@@ -2,8 +2,8 @@ import React from "react";
 //import Footer from "@/components/footer/footer";
 import Header from "@/components/header";
 import PropertyCard from "@/components/estateCard";
-// import { useUser } from "../context/UserContext";
-// import PopoutWindow from "@/components/Popout";
+import { useUser } from "../context/context";
+import PopoutWindow from "@/components/popout";
 import { useState, useEffect } from "react";
 //import MobileSidebar from "@/components/mobileHeader";
 import data from "../../public/data.json"; // Adjust the path as necessary
@@ -27,13 +27,47 @@ function useIsMobile(breakpoint = 768) {
 const Index = () => {
   // const { user, isAuthViaDiia } = useUser();
   const isMobile = useIsMobile();
+  const [isDiiaAuthenticated, setIsDiiaAuthenticated] = useState(false);
+  const { user } = useUser();
+
+  useEffect(() => {
+    const checkDiiaAuth = async () => {
+      if (user) {
+        try {
+          // Get the Firebase JWT token (ID Token)
+          const idToken = await user.getIdToken();
+
+          // Send the JWT token as Authorization Bearer token to the Diia API
+          const authResponse = await fetch(
+            `https://kazeapi.uk/user/is_authorized?id=${user.uid}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${idToken}`, // Use JWT token here
+              },
+            }
+          );
+
+          const data = await authResponse.json();
+          console.log("Diia Auth Response:", data);
+          setIsDiiaAuthenticated(data.result); // Assuming the response contains `isAuthorized`
+        } catch (error) {
+          console.error("Error checking Diia authentication:", error);
+        }
+      }
+    };
+
+    if (user) {
+      checkDiiaAuth(); // Check Diia auth after the user is logged in
+    }
+  }, [user]);
 
   return (
     <div className="overflow-x-hidden bg-black flex justify-center flex-col">
       {/* Header or Mobile Sidebar */}
       {/* {!isMobile ? <Header /> : <MobileSidebar />} */}
-      <Header/>
-      {/* {!isAuthViaDiia ? <PopoutWindow /> : null} */}
+      <Header />
+      {user && !isDiiaAuthenticated && <PopoutWindow />}
 
       {/* Main Content */}
       <div className="bg-black h-screen md:relative">
@@ -166,10 +200,10 @@ const Index = () => {
           Your <span className="text-[#ffd700]">key</span> to better renting
         </p>
         <img
-            src="/KazeLogo.svg"
-            alt="Kaze Logo"
-            className="z-10 h-32 md:h-96 mt-8 md:hidden`"
-          />
+          src="/KazeLogo.svg"
+          alt="Kaze Logo"
+          className="z-10 h-32 md:h-96 mt-8 md:hidden`"
+        />
       </div>
 
       {/* Copyright and Legal Information */}
