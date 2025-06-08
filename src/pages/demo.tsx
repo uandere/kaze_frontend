@@ -96,16 +96,13 @@ const UserForm: React.FC = () => {
   const handleLandlordChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setRentingFormData({
-      ...rentingFormData,
-      [e.target.name]: e.target.value,
-    });
+    setLandlordFormData({ ...landlordFormData, [e.target.name]: e.target.value }); 
   };
-
+  
   const handleRentingChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setTenantFormData({ ...tenantFormData, [e.target.name]: e.target.value });
+    setRentingFormData({ ...rentingFormData, [e.target.name]: e.target.value }); 
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,13 +243,13 @@ const UserForm: React.FC = () => {
         },
         body: JSON.stringify(jsonOutput),
       });
-    
+      console.log(response);
       if (response.ok) {
         const pdfBlob = await response.blob();
         const pdfUrl = URL.createObjectURL(pdfBlob);
         setPdfUrl(pdfUrl);
       } else {
-        const errorText = await response.text(); // or use await response.json() if the API returns JSON
+        const errorText = await response.text(); 
         console.error("API Error:", errorText);
         throw new Error(`Failed to fetch PDF: ${response.status} ${response.statusText}`);
       }

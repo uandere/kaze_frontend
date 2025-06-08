@@ -15,7 +15,7 @@ const CustomDropdown: FC<CustomDropdownProps> = ({
   name,
   value,
   onChange,
-  className = "",  // Default to an empty string if className is not passed
+  className = "",
 }) => (
   <div className="flex flex-row items-start gap-2">
     {label && <label className="text-white font-thin text-xl">{label}</label>}
@@ -23,7 +23,17 @@ const CustomDropdown: FC<CustomDropdownProps> = ({
       name={name}
       value={value}
       onChange={onChange}
-      className={`w-full px-4 py-2 rounded-md focus:outline-none bg-gray-400 ${className}`}
+      className={`
+    appearance-none
+    bg-gray-800
+    text-white
+    p-3
+    pr-9
+    border
+    border-gray-800
+    rounded
+    focus:outline-none
+   ${className}`}
     >
       <option value="">Select...</option>
       {options.map((option, index) => (

@@ -248,11 +248,22 @@
 // export default RentingPage;
 
 import React, { useEffect, useState } from "react";
+import useDiiaAuth from "@/hooks/isAuthorized";
 import { useRouter } from "next/router";
-import { doc, getDoc, getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import Header from "@/components/header";
-
+import { useUser } from "@/context/context";
 
 const featureList = [
   { key: "isDishwasher", label: "Dishwasher machine" },
@@ -268,23 +279,30 @@ const featureList = [
 ];
 
 const RentingPage: React.FC = () => {
+  const isDiiaAuthenticated = useDiiaAuth();
   const router = useRouter();
   const { id } = router.query;
   const [house, setHouse] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [tenant, setTenant] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [listingId, setListingId] = useState<string | null>(null);
+  const { user } = useUser();
+  console.log(isDiiaAuthenticated);
 
-
-  const fetchListingIdByUserId = async (targetUserId: string) => {
+  const fetchListingIdByUserId = async (
+    targetUserId: string,
+    currentListingId: string
+  ) => {
     const db = getFirestore();
     const listingsRef = collection(db, "listings");
     const q = query(listingsRef, where("userId", "==", targetUserId));
     try {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        return doc.id;
+        const matchedDoc = querySnapshot.docs.find(
+          (doc) => doc.id === currentListingId
+        );
+        return matchedDoc?.id || null;
       }
     } catch (error) {
       console.error("Error fetching listing by userId:", error);
@@ -309,8 +327,11 @@ const RentingPage: React.FC = () => {
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
               const userData = userSnap.data();
-              setUser(userData);
-              const foundListingId = await fetchListingIdByUserId(userId);
+              setTenant(userData);
+              const foundListingId = await fetchListingIdByUserId(
+                userId,
+                id as string
+              );
               setListingId(foundListingId);
             }
           }
@@ -334,6 +355,73 @@ const RentingPage: React.FC = () => {
   const encodedAddress = encodeURIComponent(
     `${house?.city}, ${house?.street}, ${house?.houseNumber}`
   );
+  const params = new URLSearchParams({
+    listingId: listingId || "",
+    landlordId: house.userId,
+    tenantId: user?.uid || "",
+  });
+
+  const Create_ChatId = (
+    listingId: string,
+    tenant: string,
+    landlord: string
+  ) => {
+    return `${listingId}_${tenant}_${landlord}`;
+  };
+
+  const extractIds = (chatId: string) => {
+    const [listingId, tenant, landlord] = chatId.split("_");
+    return { listingId, tenant, landlord };
+  };
+
+  const chatID = Create_ChatId(listingId || "", user?.uid || "", house.userId);
+
+  const handleClick = async () => {
+    const docRef = doc(db, "chats", chatID);
+
+    try {
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        await setDoc(docRef, {
+          createdAt: new Date(),
+          landlord_id: house.userId,
+          listing_id: listingId,
+          messages: [],
+          tenant_id: user?.uid,
+        });
+        console.log("Updated Firestore.");
+      } else {
+        console.log("Chat does not exist.");
+      }
+      if (!isDiiaAuthenticated){
+        router.push({
+          pathname: "/signIn",
+          query: { backlink: router.asPath },
+        });
+      } else {
+        router.push({
+          pathname: `/chat`,
+          query: {
+            listing_id: listingId,
+            tenant_id: user?.uid,
+            landlord_id: house.userId,
+          },
+        });
+      }
+      
+    } catch (err) {
+      console.error("Error accessing Firestore:", err);
+      router.push({
+        pathname: `/chat`,
+        query: {
+          listing_id: listingId,
+          tenant_id: user?.uid,
+          landlord_id: house.userId,
+        },
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -356,7 +444,9 @@ const RentingPage: React.FC = () => {
             </p>
             <div className="flex flex-row gap-4 text-lg font-thin mt-2">
               {house.firstTimeRental && (
-                <p className="rounded border p-1 flex justify-center">First-time rental</p>
+                <p className="rounded border p-1 flex justify-center">
+                  First-time rental
+                </p>
               )}
               {house.livingComplex && (
                 <p className="rounded border p-1 flex justify-center">
@@ -364,10 +454,14 @@ const RentingPage: React.FC = () => {
                 </p>
               )}
               {house.isPetFriendly && (
-                <p className="rounded border p-1 flex justify-center">Pet-friendly</p>
+                <p className="rounded border p-1 flex justify-center">
+                  Pet-friendly
+                </p>
               )}
               {house.isChildrenFriendly && (
-                <p className="rounded border p-1 flex justify-center">Children-friendly</p>
+                <p className="rounded border p-1 flex justify-center">
+                  Children-friendly
+                </p>
               )}
             </div>
             <div className="flex flex-row gap-6">
@@ -378,15 +472,19 @@ const RentingPage: React.FC = () => {
             <div className="border border-[#ffd700] rounded-xl p-4">
               <div className="flex space-x-4 items-center">
                 <div>
-                  <p className="font-bold">{user?.name}</p>
+                  <p className="font-bold">{tenant?.name}</p>
                   <p className="font-thin">
-                    {user?.successfullrentalsBefore ?? 0} successful rentals before
+                    {tenant?.successfullrentalsBefore ?? 0} successful rentals
+                    before
                   </p>
                 </div>
               </div>
             </div>
             <div className="flex space-x-4">
-            <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center" onClick={() => router.push(`/chat/${listingId}_${house.userId}_${user.uid}`)}>
+              <button
+                className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center"
+                onClick={handleClick}
+              >
                 <p>Chat</p>
               </button>
               <button className="bg-white w-52 py-2 rounded text-black flex flex-row gap-2 justify-center">
@@ -398,7 +496,9 @@ const RentingPage: React.FC = () => {
 
         <section className="flex flex-row p-20">
           <div className="w-1/2">
-            <h3 className="text-3xl font-bold flex justify-center">Description</h3>
+            <h3 className="text-3xl font-bold flex justify-center">
+              Description
+            </h3>
             <p className="font-thin text-sm">{house.description}</p>
             <h3 className="text-3xl font-bold flex justify-center">Details</h3>
             <div className="grid grid-cols-3 gap-4 mt-8 font-bold">
@@ -415,10 +515,14 @@ const RentingPage: React.FC = () => {
                   )
               )}
             </div>
-            <h3 className="text-3xl font-bold flex justify-center">Amenities</h3>
+            <h3 className="text-3xl font-bold flex justify-center">
+              Amenities
+            </h3>
             <div className="flex flex-row gap-4 mb-6 items-center mt-8 font-bold">
               <img src="/parking.svg" alt="Parking" width={30} />
-              <p>Parking lot: <span className="text-green-500">available</span></p>
+              <p>
+                Parking lot: <span className="text-green-500">available</span>
+              </p>
             </div>
             <a href="/marketsNearby">
               <div className="flex flex-row gap-4 mb-6 items-center font-bold">

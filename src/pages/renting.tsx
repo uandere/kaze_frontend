@@ -102,38 +102,38 @@ const HousesPage: React.FC = () => {
 
   // If the user is not logged in, display login UI
   // if (!user && !isAuthViaDiia) {
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Header />
-        <div>
-          <div className="w-[582px] bg-neutral-600 h-[263px] flex flex-col items-center justify-center rounded-xl">
-            <h1 className="font-bold text-white text-3xl">Sign Up</h1>
-            <button
-              onClick={handleGoogleSignIn}
-              className="mt-4 bg-black text-white flex flex-row items-center justify-center rounded-lg px-6 py-2"
-            >
-              <img
-                src="image_google.svg"
-                alt="Google Icon"
-                className="w-7 h-7 mr-4"
-              />
-              <div className="text-xl">Sign in with Google</div>
-            </button>
-            <div className="flex flex-row items-center justify-center text-xl font-thin mt-10">
-              <p className="text-white">Already have an account?</p>
-              <button
-                className="underline text-yellow-400 ml-2"
-                onClick={() => router.push("/signIn")}
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <div className="min-h-screen flex flex-col items-center justify-center">
+  //       <Header />
+  //       <div>
+  //         <div className="w-[582px] bg-neutral-600 h-[263px] flex flex-col items-center justify-center rounded-xl">
+  //           <h1 className="font-bold text-white text-3xl">Sign Up</h1>
+  //           <button
+  //             onClick={handleGoogleSignIn}
+  //             className="mt-4 bg-black text-white flex flex-row items-center justify-center rounded-lg px-6 py-2"
+  //           >
+  //             <img
+  //               src="image_google.svg"
+  //               alt="Google Icon"
+  //               className="w-7 h-7 mr-4"
+  //             />
+  //             <div className="text-xl">Sign in with Google</div>
+  //           </button>
+  //           <div className="flex flex-row items-center justify-center text-xl font-thin mt-10">
+  //             <p className="text-white">Already have an account?</p>
+  //             <button
+  //               className="underline text-yellow-400 ml-2"
+  //               onClick={() => router.push("/signIn")}
+  //             >
+  //               Sign In
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (false && user) {
     return (
@@ -199,8 +199,8 @@ const HousesPage: React.FC = () => {
               </div>
               <div className="flex flex-row items-center space-x-4 w-full">
                 <select className="p-3 border rounded bg-gray-800 border-gray-800 w-1/3 text-white">
-                  <option value="Ч">UAH</option>
                   <option>All filters</option>
+                  <option value="Ч">UAH</option>
                   <option value="Ж">USD</option>
                   <option value="Ч">EUR</option>
                 </select>
@@ -272,7 +272,8 @@ const HousesPage: React.FC = () => {
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
                 src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv+${encodeURIComponent(
-                  selectedAddress || "https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv"
+                  selectedAddress ||
+                    "https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv"
                 )}`}
               />
             </div>

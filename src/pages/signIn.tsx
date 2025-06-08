@@ -4,10 +4,13 @@ import { auth } from "../../firebase/firebaseConfig";
 import { User } from "firebase/auth";
 import { useRouter } from "next/router";
 import Header from "@/components/header";
+import useDiiaAuth from "@/hooks/isAuthorized";
 
 const SignIn = () => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const backlink = router.query.backlink as string;
+  const isDiiaAuthenticated = useDiiaAuth();
 
   const HandleGoogle = async () => {
     try {
@@ -15,7 +18,7 @@ const SignIn = () => {
       const result = await signInWithPopup(auth, provider);
       setUser(result.user);
 
-      router.push("/diiaAuth");
+      router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("Error signing in with Google: ", err.message);
@@ -46,7 +49,12 @@ const SignIn = () => {
   }, []);
 
   const handleNavigate = (route: string) => {
-    router.push(route);
+    if (!isDiiaAuthenticated) {
+      router.push({
+        pathname: "/diiaAuth",
+        query: { backlink: backlink },
+      });
+    }
   };
 
   return (
@@ -90,10 +98,23 @@ const SignIn = () => {
             onClick={() => handleNavigate("/diiaAuth")}
             className="mt-4 text-2xl bg-[#131314] text-white p-1 rounded-lg flex flex-row items-center justify-center gap-10 px-16 border"
           >
-            <img src="/diia.svg" />
+            <img src="/diiaStroke.svg" width={"24px"} />
             Verificate using Diia
           </button>
-          <button className="text-[#ffd700] underline text-xl" onClick={()=>handleNavigate("/")}>No, take me to the home page</button>
+          <div className="flex flex-col text-xl font-thin">
+            <p className="font-bold text-xl text-center">
+              After this you will be able to:
+            </p>
+            <p className="mt-2">💬 Chat with other people on the platform</p>
+            <p>🏠 Create your own apartment listings</p>
+            <p>📅 Book apartment reviews in calendar</p>
+          </div>
+          <button
+            className="text-[#ffd700] underline text-xl"
+            onClick={() => handleNavigate("/")}
+          >
+            No, take me to the home page
+          </button>
           <button
             onClick={HandleLogout}
             className="mt-4 text-gray-300  p-3 rounded-lg underline"
