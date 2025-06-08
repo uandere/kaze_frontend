@@ -20,7 +20,7 @@
 # production
 /build
 out
-.idea
+.idea/
 
 # misc
 .DS_Store
