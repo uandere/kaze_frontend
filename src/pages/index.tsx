@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
-import FooterLegal from "@/components/layout/Footer";
+import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/features/landing/HeroSection";
 import BestChoices from "@/components/features/property/BestChoices";
 import StatsBlock from "@/components/features/landing/StatsBlock";
@@ -21,11 +21,16 @@ const Home = () => {
   return (
     <div className="bg-black flex flex-col">
       <Header />
-      {user && !isDiiaAuthenticated && <PopoutWindow />}
+      {user && !isDiiaAuthenticated && (
+        <PopoutWindow
+          title="Looks like you didn’t complete your registration"
+          text="Please, finish it to have full experience ❤️"
+        />
+      )}
       <HeroSection />
       <BestChoices />
       <StatsBlock />
-      <FooterLegal />
+      <Footer />
     </div>
   );
 };

@@ -1,1 +1,5 @@
-export interface PopoutWindowProps {}
+export interface PopoutWindowProps {
+    title: string;
+    text: string;
+  }
+  
