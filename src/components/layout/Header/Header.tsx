@@ -1,6 +1,8 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { useUser } from "@/context/context";
+import Image from "next/image";
+import Button from "@/components/layout/Button";
 
 const Header = () => {
   const { user } = useUser();
@@ -13,56 +15,56 @@ const Header = () => {
   const getButtonClass = (route: string) => {
     const isActive = router.pathname === route;
     return isActive
-      ? "font-thin text-2xl custom-button underline underline-offset-5"
-      : "font-thin text-2xl custom-button";
+      ? "font-nunito text-3xl"
+      : "font-nunito text-3xl";
   };
 
   return (
-    <header className="!bg-black py-6 px-10 flex flex-row justify-between fixed top-0 w-full z-50">
-      <div className="gap-12 space-x-12">
-        <button
-          className="text-[#ffd700] font-bold text-2xl custom-button"
-          onClick={() => handleClick("/")}
-        >
-          Kaze
-        </button>
-        <button
-          className={getButtonClass("/renting")}
+    <header className="py-6 px-16 flex flex-row justify-between items-center fixed top-0 w-full z-50">
+      <div className="flex items-center gap-16">
+        <div onClick={() => handleClick("/")} className="cursor-pointer">
+          <Image
+            src="/NewLogo.svg"
+            alt="Kaze Logo"
+            width={100}
+            height={100}
+            className="object-contain"
+          />
+        </div>
+
+        <Button
+          text="Renting"
           onClick={() => handleClick("/renting")}
-        >
-          Renting
-        </button>
-        <button
-          className={getButtonClass("/cleaning")}
+          className={getButtonClass("/renting")}
+        />
+        <Button
+          text="Cleaning"
           onClick={() => handleClick("/cleaning")}
-        >
-          Cleaning
-        </button>
-        <button
-          className={getButtonClass("/repair")}
+          className={getButtonClass("/cleaning")}
+        />
+        <Button
+          text="Repair"
           onClick={() => handleClick("/repair")}
-        >
-          Repair
-        </button>
-        <button
-          className={getButtonClass("/demo")}
+          className={getButtonClass("/repair")}
+        />
+        <Button
+          text="Demo"
           onClick={() => handleClick("/demo")}
-        >
-          Demo
-        </button>
+          className={getButtonClass("/demo")}
+        />
       </div>
-      <div>
+
+      <div className="flex items-center">
         {!user ? (
-          <button
-            className={getButtonClass("/signIn")}
+          <Button
+            text="Sign In"
             onClick={() => handleClick("/signIn")}
-          >
-            Sign In
-          </button>
+            className={`unbounded-custom px-15 py-5 bg-gradient-to-r from-[#FCBF29] to-[#ED8F03] rounded-xl ${getButtonClass("/signIn")}`}
+          />
         ) : (
-          <a className="flex items-center justify-center gap-2" href="/signIn">
+          <a className="flex items-center gap-2" href="/signIn">
             <h1 className="font-thin text-2xl">{user.displayName}</h1>
-            <img src="user.svg" className="h-8 w-8" />
+            <img src="user.svg" className="h-8 w-8 object-contain" />
           </a>
         )}
       </div>

@@ -7,6 +7,9 @@ import StatsBlock from "@/components/features/landing/StatsBlock";
 import PopoutWindow from "@/components/features/auth/PopoutWindow";
 import { useUser } from "@/context/context";
 import { checkDiiaAuth } from "@/lib/api/diia";
+import TrustUs from "@/components/features/landing/TrustUs";
+import Achivements from "@/components/features/landing/Achivements";
+import ContactsSection from "@/components/features/landing/Contact";
 
 const Home = () => {
   const { user } = useUser();
@@ -19,7 +22,7 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div className="bg-black flex flex-col">
+    <div>
       <Header />
       {user && !isDiiaAuthenticated && (
         <PopoutWindow
@@ -28,8 +31,9 @@ const Home = () => {
         />
       )}
       <HeroSection />
-      <BestChoices />
-      <StatsBlock />
+      <TrustUs/>
+      <Achivements/>
+      <ContactsSection/>
       <Footer />
     </div>
   );
