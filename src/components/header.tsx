@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useUser } from "@/context/context";
 
 const Header = () => {
-  const { user } = useUser(); // Access user from context
+  const { user } = useUser();
   const router = useRouter();
 
   const handleClick = (route: string) => {
@@ -11,7 +11,6 @@ const Header = () => {
   };
 
   const getButtonClass = (route: string) => {
-    // Check if the current route is the same as the button's route
     const isActive = router.pathname === route;
     return isActive
       ? "font-thin text-2xl custom-button underline underline-offset-5"
