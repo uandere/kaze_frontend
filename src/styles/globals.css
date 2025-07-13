@@ -1,5 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@200;400;600;700&display=swap');
 @import "tailwindcss";
-
 body {
   margin: 0;
   background-color: black;
@@ -54,4 +54,11 @@ body {
 
 .custom-pagination .ant-pagination-item:hover a {
   color: gold !important;
+}
+
+.unbounded-custom {
+  font-family: "Unbounded", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
