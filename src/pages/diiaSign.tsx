@@ -4,6 +4,7 @@ import { useUser } from "@/context/context";
 import QRCode from "react-qr-code";
 import Header from "@/components/header";
 import Timer from "@/components/timer";
+import getUserTokens from "@/utils/jwt";
 
 const SignPage = () => {
   const router = useRouter();
@@ -20,14 +21,15 @@ const SignPage = () => {
     const fetchAgreementStatus = async () => {
       if (!tenant || !landlord || !listingId || !user) return;
       try {
-        const token = await user.getIdToken();
+        const {idToken, userId} = await getUserTokens();
+
         const response = await fetch(
           `https://kazeapi.uk/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`,
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${idToken}`,
             },
           }
         );
@@ -61,12 +63,12 @@ const SignPage = () => {
         return;
       }
       try {
-        const token = await user.getIdToken();
+        const {idToken, userId} = await getUserTokens();
         const url = `https://kazeapi.uk/agreement/get_sign_link?landlord_id=${landlord}&tenant_id=${tenant}&housing_id=${listingId}`;
         const res = await fetch(url, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${idToken}`,
             "Content-Type": "application/json",
           },
         });

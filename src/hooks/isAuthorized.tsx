@@ -1,23 +1,24 @@
-import { useState, useEffect } from "react";
-import { useUser } from "@/context/context";
+import {useState, useEffect} from "react";
+import {useUser} from "@/context/context";
+import getUserTokens from "@/utils/jwt";
 
 function useDiiaAuth(): boolean | null {
-  const { user } = useUser();
+  const {user} = useUser();
   const [isDiiaAuthenticated, setIsDiiaAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const checkDiiaAuth = async () => {
       try {
         if (!user) {
           if (isMounted) setIsDiiaAuthenticated(null);
           return;
         }
-        
-        const idToken = await user.getIdToken();
+        const {idToken, userId} = await getUserTokens();
+
         const authResponse = await fetch(
-          `https://kazeapi.uk/user/is_authorized?id=${user.uid}`,
+          `https://kazeapi.uk/user/is_authorized?id=${userId}`,
           {
             method: "GET",
             headers: {
@@ -27,7 +28,7 @@ function useDiiaAuth(): boolean | null {
         );
 
         const data = await authResponse.json();
-        
+
         if (isMounted) {
           setIsDiiaAuthenticated(data.result === true);
         }
@@ -40,7 +41,7 @@ function useDiiaAuth(): boolean | null {
     };
 
     checkDiiaAuth();
-    
+
     return () => {
       isMounted = false;
     };

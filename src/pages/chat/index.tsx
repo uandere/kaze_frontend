@@ -5,7 +5,8 @@ import { useRouter } from "next/router";
 import EstateCard from "@/components/estateCard";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
-import { useUser } from "../../context/context";
+import { useUser } from "@/context/context";
+import getUserTokens from "@/utils/jwt";
 
 const Chatroom = () => {
   const router = useRouter();
@@ -20,10 +21,6 @@ const Chatroom = () => {
     tenant: string;
     landlord: string;
   } | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-
-  
-
   const extractIds = (chatId: string | undefined | string[]) => {
     if (!chatId || typeof chatId !== "string") {
       return { listingId: "", tenant: "", landlord: "" };
@@ -44,7 +41,7 @@ const Chatroom = () => {
       if (user) {
         try {
           // Get the Firebase JWT token (ID Token)
-          const idToken = await user.getIdToken();
+          const {idToken, userId} = await getUserTokens();
 
           // Send the JWT token as Authorization Bearer token to the Diia API
           const authResponse = await fetch(
@@ -128,8 +125,8 @@ const Chatroom = () => {
 
   const generateCall = async () => {
     try {
-      const jwtToken = await user?.getIdToken();
-      console.log("JWT Token:", jwtToken);
+      const {idToken, userId} = await getUserTokens();
+
       const tenantId = user?.uid;
       console.log("Tenant ID:", tenantId);
       console.log("Matched House:", matchedHouse);
@@ -143,7 +140,7 @@ const Chatroom = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           tenant_id: info.tenant,
@@ -152,7 +149,7 @@ const Chatroom = () => {
         }),
       });
 
-      const contentType = await response.headers.get("content-type");
+      const contentType = response.headers.get("content-type");
       const rawText = await response.text();
       console.log("Raw response:", rawText);
 
@@ -193,13 +190,14 @@ const Chatroom = () => {
 
     try {
       setLoading(true);
-      const token = await user.getIdToken();
+      const {idToken, userId} = await getUserTokens();
+
       const url = `https://kazeapi.uk/agreement/get?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`;
 
       const res = await fetch(url, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
 

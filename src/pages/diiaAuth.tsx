@@ -7,6 +7,7 @@ import { db } from "../../firebase/firebaseConfig";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import Timer from "@/components/timer";
 import Image from "next/image";
+import getUserTokens from "@/utils/jwt";
 
 const SharingLinkFetcher: React.FC = () => {
   const { user } = useUser();
@@ -30,13 +31,13 @@ const SharingLinkFetcher: React.FC = () => {
     setError(null);
 
     try {
-      const token = await user.getIdToken();
-      console.log("Token:", token);
+      const {idToken, userId} = await getUserTokens();
+
       const response = await fetch("https://kazeapi.uk/user/get_sharing_link", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
 
@@ -100,10 +101,10 @@ const SharingLinkFetcher: React.FC = () => {
       if (!user) return;
 
       try {
-        const idToken = await user.getIdToken();
+        const {idToken, userId} = await getUserTokens();
 
         const authResponse = await fetch(
-          `https://kazeapi.uk/user/is_authorized?id=${user.uid}`,
+          `https://kazeapi.uk/user/is_authorized?id=${userId}`,
           {
             method: "GET",
             headers: {

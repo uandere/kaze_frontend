@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/header";
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth";
+import { signOut } from '@aws-amplify/auth';
 import { User } from "firebase/auth";
 import { useRouter } from "next/router";
 import { auth } from "../../firebase/firebaseConfig";
+import {signInWithRedirect} from "@aws-amplify/auth";
 
 const signUp = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -11,9 +13,8 @@ const signUp = () => {
 
   const HandleGoogle = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
+      await signInWithRedirect({ provider: 'Google' });
+      setUser(null);
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("Error signing in with Google: ", err.message);
@@ -24,7 +25,7 @@ const signUp = () => {
   };
   const HandleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut();
       setUser(null);
     } catch (err: unknown) {
       if (err instanceof Error) {

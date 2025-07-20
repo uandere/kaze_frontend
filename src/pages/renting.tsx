@@ -5,7 +5,9 @@ import PropertyCard from "@/components/estateCard";
 import Header from "@/components/header";
 import { useRouter } from "next/router";
 import { useUser } from "@/context/context"; // Use the user context
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth";
+import { signOut } from '@aws-amplify/auth';
+import { signInWithRedirect } from '@aws-amplify/auth';
 import { auth } from "../../firebase/firebaseConfig";
 
 const HousesPage: React.FC = () => {
@@ -15,7 +17,6 @@ const HousesPage: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const itemsPerPage = 4;
   const router = useRouter();
-  //const { user, isAuthViaDiia } = useUser(); // Access user and Diia authentication status from context
   const { user } = useUser(); // Access user from context
   const [clickCount, setClickCount] = useState(0);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -76,7 +77,7 @@ const HousesPage: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithRedirect({ provider: 'Google' });
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("Error signing in with Google: ", err.message);
@@ -88,7 +89,7 @@ const HousesPage: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut();
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error("Error signing out: ", err.message);

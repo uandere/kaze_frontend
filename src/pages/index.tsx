@@ -17,7 +17,7 @@ const Home = () => {
 
   useEffect(() => {
     if (user) {
-      checkDiiaAuth(user).then(setIsDiiaAuthenticated).catch(console.error);
+      checkDiiaAuth().then(setIsDiiaAuthenticated).catch(console.error);
     }
   }, [user]);
 

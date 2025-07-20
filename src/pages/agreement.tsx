@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useUser } from "@/context/context";
+import getUserTokens from "@/utils/jwt";
 
 const AgreementPage = () => {
   const router = useRouter();
@@ -15,13 +16,13 @@ const AgreementPage = () => {
 
     const fetchAgreement = async () => {
       try {
-        const token = await user.getIdToken();
-        const url = `https://kazeapi.uk/agreement/get?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`;
+        const {idToken, userId} = await getUserTokens();
 
+        const url = `https://kazeapi.uk/agreement/get?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`;
         const res = await fetch(url, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${idToken}`,
           },
         });
 

@@ -1,13 +1,26 @@
-import { UserProvider } from "@/context/context"; // Import your UserProvider
-import { AppProps } from "next/app"; // Import AppProps type from Next.js
-import "@/styles/globals.css"; // Import global styles
+// src/pages/_app.tsx
+import { Amplify } from "@aws-amplify/core";
+import outputs from "../../amplify_outputs.json";
 
-function MyApp({ Component, pageProps }: AppProps) {
+import { Authenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
+
+import { AuthProvider }  from "@/context/auth";
+import { UserProvider }  from "@/context/context";
+
+import type { AppProps } from "next/app";
+import "@/styles/globals.css";
+
+Amplify.configure(outputs);
+
+export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <UserProvider>
-      <Component {...pageProps} />
-    </UserProvider>
+    <Authenticator.Provider>
+      <UserProvider>
+        <AuthProvider>
+          <Component {...pageProps} />
+        </AuthProvider>
+      </UserProvider>
+    </Authenticator.Provider>
   );
 }
-
-export default MyApp;

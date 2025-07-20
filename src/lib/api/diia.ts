@@ -1,8 +1,8 @@
-import { User } from "firebase/auth";
+import getUserTokens from "@/utils/jwt";
 
-export async function checkDiiaAuth(user: User): Promise<boolean> {
-  const idToken = await user.getIdToken();
-  const res = await fetch(`https://kazeapi.uk/user/is_authorized?id=${user.uid}`, {
+export async function checkDiiaAuth(): Promise<boolean> {
+  const {idToken, userId} = await getUserTokens();
+  const res = await fetch(`https://kazeapi.uk/user/is_authorized?id=${userId}`, {
     headers: { Authorization: `Bearer ${idToken}` },
   });
 
