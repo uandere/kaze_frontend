@@ -36,7 +36,7 @@ export const UserProvider = ({children}: { children: ReactNode }) => {
         const {tokens} = (await fetchAuthSession());
         const idToken = tokens?.idToken?.toString();
 
-        const url = `https://kazeapi.uk/user/is_authorized?id=${encodeURIComponent(
+        const url = `https://api.myrenta.org/user/is_authorized?id=${encodeURIComponent(
           user.userId,
         )}`;
 
@@ -60,8 +60,8 @@ export const UserProvider = ({children}: { children: ReactNode }) => {
   );
 };
 
-export const useUser = () => {
-  const ctx = useContext(UserContext);
-  if (!ctx) throw new Error('useUser must be used within UserProvider');
-  return ctx;
-};
+// export const useUser = () => {
+//   const ctx = useContext(UserContext);
+//   if (!ctx) throw new Error('useUser must be used within UserProvider');
+//   return ctx;
+// };

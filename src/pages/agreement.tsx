@@ -18,7 +18,7 @@ const AgreementPage = () => {
       try {
         const {idToken, userId} = await getUserTokens();
 
-        const url = `https://kazeapi.uk/agreement/get?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`;
+        const url = `https://api.myrenta.org/agreement/get?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`;
         const res = await fetch(url, {
           method: "GET",
           headers: {

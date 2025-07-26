@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 import { useRouter } from "next/router";
 import EstateCard from "@/components/estateCard";
 import { collection, getDocs } from "firebase/firestore";
@@ -45,7 +45,7 @@ const Chatroom = () => {
 
           // Send the JWT token as Authorization Bearer token to the Diia API
           const authResponse = await fetch(
-            `https://kazeapi.uk/user/is_authorized?id=${user.uid}`,
+            `https://api.myrenta.org/user/is_authorized?id=${user.uid}`,
             {
               method: "GET",
               headers: {
@@ -113,7 +113,7 @@ const Chatroom = () => {
     if (!info) return;
     try {
       const response = await fetch(
-        `https://kazeapi.uk/agreement/status?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`
+        `https://api.myrenta.org/agreement/status?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`
       );
       const data = await response.json();
       console.log("Agreement Status:", data);
@@ -136,7 +136,7 @@ const Chatroom = () => {
         return;
       }
 
-      const response = await fetch("https://kazeapi.uk/agreement/generate", {
+      const response = await fetch("https://api.myrenta.org/agreement/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -192,7 +192,7 @@ const Chatroom = () => {
       setLoading(true);
       const {idToken, userId} = await getUserTokens();
 
-      const url = `https://kazeapi.uk/agreement/get?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`;
+      const url = `https://api.myrenta.org/agreement/get?tenant_id=${info.tenant}&landlord_id=${info.landlord}&housing_id=${info.listingId}`;
 
       const res = await fetch(url, {
         method: "GET",

@@ -1,17 +1,17 @@
-// src/pages/_app.tsx
-import { Amplify } from 'aws-amplify';        // ← correct package
+import {Amplify} from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
 
-import { Authenticator, ThemeProvider } from '@aws-amplify/ui-react';
+import {Authenticator, ThemeProvider} from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import "@/styles/globals.css";
 
-Amplify.configure(outputs);                  // ← now Auth sees the config
+Amplify.configure(outputs);
 
-export default function MyApp({ Component, pageProps }) {
+// @ts-ignore
+export default function MyApp({Component, pageProps}) {
   return (
     <ThemeProvider>
-      <Authenticator.Provider>               {/* keeps auth context everywhere */}
+      <Authenticator.Provider>
         <Component {...pageProps} />
       </Authenticator.Provider>
     </ThemeProvider>

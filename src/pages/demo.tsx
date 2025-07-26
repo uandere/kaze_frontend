@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropertyCard from "@/components/estateCard";
 import Base64ToPDF from "@/components/base64ToPdf";
 import { getAuth } from "firebase/auth";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 import { db } from "../../firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 
@@ -236,7 +236,7 @@ const UserForm: React.FC = () => {
     console.log("Sending JSON:", JSON.stringify(jsonOutput, null, 2));
 
     try {
-      const response = await fetch("https://kazeapi.uk/agreement/demo", {
+      const response = await fetch("https://api.myrenta.org/agreement/demo", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

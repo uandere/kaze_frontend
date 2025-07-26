@@ -18,7 +18,7 @@ function useDiiaAuth(): boolean | null {
         const {idToken, userId} = await getUserTokens();
 
         const authResponse = await fetch(
-          `https://kazeapi.uk/user/is_authorized?id=${userId}`,
+          `https://api.myrenta.org/user/is_authorized?id=${userId}`,
           {
             method: "GET",
             headers: {

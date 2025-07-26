@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useUser } from "../context/context";
 import QRCode from "react-qr-code";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 import { useRouter } from "next/router";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import Timer from "@/components/timer";
 import Image from "next/image";
 import getUserTokens from "@/utils/jwt";
+import {useAuthenticator} from "@aws-amplify/ui-react";
 
 const SharingLinkFetcher: React.FC = () => {
-  const { user } = useUser();
+  const { authStatus, user } =
+    useAuthenticator(ctx => [ctx.authStatus, ctx.user]);
   const router = useRouter();
   const backlink = router.query.backlink as string
 
@@ -33,7 +34,7 @@ const SharingLinkFetcher: React.FC = () => {
     try {
       const {idToken, userId} = await getUserTokens();
 
-      const response = await fetch("https://kazeapi.uk/user/get_sharing_link", {
+      const response = await fetch("https://api.myrenta.org/user/get_sharing_link", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +74,7 @@ const SharingLinkFetcher: React.FC = () => {
   const becomeLandlord = async () => {
     if (!user) return;
     try {
-      await updateDoc(doc(db, "users", user.uid), {
+      await updateDoc(doc(db, "users", user.userId), {
         role: "landlord",
       });
       router.push(backlink || "/");
@@ -85,7 +86,7 @@ const SharingLinkFetcher: React.FC = () => {
   const becomeTenant = async () => {
     if (!user) return;
     try {
-      await updateDoc(doc(db, "users", user.uid), {
+      await updateDoc(doc(db, "users", user.userId), {
         role: "tenant",
       });
       router.push(backlink || "/");
@@ -104,7 +105,7 @@ const SharingLinkFetcher: React.FC = () => {
         const {idToken, userId} = await getUserTokens();
 
         const authResponse = await fetch(
-          `https://kazeapi.uk/user/is_authorized?id=${userId}`,
+          `https://api.myrenta.org/user/is_authorized?id=${userId}`,
           {
             method: "GET",
             headers: {
@@ -120,7 +121,7 @@ const SharingLinkFetcher: React.FC = () => {
 
           if (authData?.result === true) {
             const nameResponse = await fetch(
-              `https://kazeapi.uk/user/name?id=${user.uid}`,
+              `https://api.myrenta.org/user/name?id=${user.userId}`,
               {
                 method: "GET",
                 headers: {
@@ -134,7 +135,7 @@ const SharingLinkFetcher: React.FC = () => {
               const name = nameData.name;
               setUserName(name);
 
-              await saveUserToFirestore(user.uid, name);
+              await saveUserToFirestore(user.userId, name);
 
               clearInterval(interval);
             }

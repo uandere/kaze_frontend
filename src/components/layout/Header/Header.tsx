@@ -1,6 +1,5 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { useUser } from "@/context/context";
 import Image from "next/image";
 import Button from "@/components/layout/Button";
 import {useAuthenticator} from "@aws-amplify/ui-react";

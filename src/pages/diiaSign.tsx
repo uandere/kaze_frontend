@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useUser } from "@/context/context";
 import QRCode from "react-qr-code";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 import Timer from "@/components/timer";
 import getUserTokens from "@/utils/jwt";
 
@@ -24,7 +24,7 @@ const SignPage = () => {
         const {idToken, userId} = await getUserTokens();
 
         const response = await fetch(
-          `https://kazeapi.uk/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`,
+          `https://api.myrenta.org/agreement/status?tenant_id=${tenant}&landlord_id=${landlord}&housing_id=${listingId}`,
           {
             method: "GET",
             headers: {
@@ -64,7 +64,7 @@ const SignPage = () => {
       }
       try {
         const {idToken, userId} = await getUserTokens();
-        const url = `https://kazeapi.uk/agreement/get_sign_link?landlord_id=${landlord}&tenant_id=${tenant}&housing_id=${listingId}`;
+        const url = `https://api.myrenta.org/agreement/get_sign_link?landlord_id=${landlord}&tenant_id=${tenant}&housing_id=${listingId}`;
         const res = await fetch(url, {
           method: "GET",
           headers: {

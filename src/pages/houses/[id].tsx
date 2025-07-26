@@ -2,7 +2,7 @@
 // import { useRouter } from "next/router";
 // import { doc, getDoc } from "firebase/firestore";
 // import { db } from "../../../firebase/firebaseConfig";
-// import Header from "@/components/header";
+// import Header from "@/components/layout/Header/Header";
 // import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
 // import StairsIcon from "@mui/icons-material/Stairs";
 // import CropFreeOutlinedIcon from "@mui/icons-material/CropFreeOutlined";
@@ -262,7 +262,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 import { useUser } from "@/context/context";
 
 const featureList = [

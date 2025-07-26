@@ -13,7 +13,7 @@ const Home = () => {
   const [isDiiaAuthenticated, setIsDiiaAuthenticated] = useState(false);
 
   const { authStatus, user } =
-    useAuthenticator(ctx => [ctx.authStatus, ctx.user]); // selector = fast
+    useAuthenticator(ctx => [ctx.authStatus, ctx.user]);
 
   useEffect(() => {
     if (authStatus === 'authenticated') {

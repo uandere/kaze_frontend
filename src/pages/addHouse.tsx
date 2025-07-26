@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 import CustomInput from "@/components/CInput";
 import CustomCheckbox from "@/components/CCheckbox";
 import CustomDropdown from "@/components/CDropdown";
@@ -7,7 +7,6 @@ import CustomDropbox from "@/components/CDropbox";
 import { uploadFileToStorage } from "@/utils/upload";
 import { db } from "../../firebase/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
-import { useUser } from "@/context/context";
 import useDiiaAuth from "@/hooks/isAuthorized";
 import { useRouter } from "next/router";
 

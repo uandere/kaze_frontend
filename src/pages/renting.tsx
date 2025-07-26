@@ -1,7 +1,7 @@
 // TODO: This file needs severe refactoring.
 
 import React, { useState, useEffect, useRef } from "react";
-import Header from "@/components/header";
+import Header from "@/components/layout/Header/Header";
 const HousesPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
