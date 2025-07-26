@@ -1,78 +1,67 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { getAuth, onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-import app from "../../firebase/firebaseConfig";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
+import {useAuthenticator} from '@aws-amplify/ui-react';
+import {
+  fetchAuthSession,
+  getCurrentUser,
+} from '@aws-amplify/auth';
 
 interface UserDIIAAuth {
   user: string | null;
 }
 
+type AmplifyUser = Awaited<ReturnType<typeof getCurrentUser>>;
+
 interface UserContextType {
-  user: FirebaseUser | null;
+  user: AmplifyUser | null;
   diiaAuth: UserDIIAAuth | null;
 }
 
-interface UserProviderProps {
-  children: ReactNode;
-}
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+export const UserProvider = ({children}: { children: ReactNode }) => {
+  const {user} = useAuthenticator((ctx) => [ctx.user]);
   const [diiaAuth, setDiiaAuth] = useState<UserDIIAAuth | null>(null);
 
   useEffect(() => {
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
+    const checkDiia = async () => {
+      if (!user) return setDiiaAuth(null);
 
-      if (firebaseUser) {
-        try {
-          const encodedUid = encodeURIComponent(firebaseUser.uid);
-          
-          const requestUrl = `https://kazeapi.uk/user/is_authorized?id=${encodedUid}`;
-          console.log("Request URL:", requestUrl);
+      try {
+        const {tokens} = (await fetchAuthSession());
+        const idToken = tokens?.idToken?.toString();
 
-          const response = await fetch(requestUrl, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+        const url = `https://kazeapi.uk/user/is_authorized?id=${encodeURIComponent(
+          user.userId,
+        )}`;
 
-          if (!response.ok) {
-            throw new Error(`Failed to fetch DIIA auth status. Status: ${response.body}`);
-          }
-
-          const contentType = response.headers.get("Content-Type");
-          if (contentType && contentType.includes("application/json")) {
-            const data: UserDIIAAuth = await response.json();
-            setDiiaAuth(data);
-          } else {
-            throw new Error("Response is not in JSON format");
-          }
-        } catch (error) {
-          console.log("Error fetching DIIA auth status:", error);
-          setDiiaAuth(null);
-        }
-      } else {
+        const res = await fetch(url, {
+          headers: {Authorization: `Bearer ${idToken}`},
+        });
+        if (!res.ok) throw new Error('Diia check failed');
+        setDiiaAuth(await res.json());
+      } catch {
         setDiiaAuth(null);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    checkDiia();
+  }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, diiaAuth }}>
+    <UserContext.Provider value={{user, diiaAuth}}>
       {children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = (): UserContextType => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
+export const useUser = () => {
+  const ctx = useContext(UserContext);
+  if (!ctx) throw new Error('useUser must be used within UserProvider');
+  return ctx;
 };

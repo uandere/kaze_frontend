@@ -1,102 +1,56 @@
-import React, { useState, useEffect } from "react";
-import Header from "@/components/header";
-import { GoogleAuthProvider } from "firebase/auth";
-import { signOut } from '@aws-amplify/auth';
-import { User } from "firebase/auth";
+import React from "react";
+import { signInWithRedirect, signOut } from "@aws-amplify/auth";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 import { useRouter } from "next/router";
-import { auth } from "../../firebase/firebaseConfig";
-import {signInWithRedirect} from "@aws-amplify/auth";
+import Header from "@/components/header";
 
-const signUp = () => {
-  const [user, setUser] = useState<User | null>(null);
+const SignUp = () => {
+  const { user } = useAuthenticator((c) => [c.user]);
   const router = useRouter();
+  const nav = (p: string) => router.push(p);
 
-  const HandleGoogle = async () => {
-    try {
-      await signInWithRedirect({ provider: 'Google' });
-      setUser(null);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error("Error signing in with Google: ", err.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  };
-  const HandleLogout = async () => {
-    try {
-      await signOut();
-      setUser(null);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error("Error signing out: ", err.message);
-      } else {
-        console.error("An unknown error occurred during sign out");
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const unsubscribe = auth.onAuthStateChanged(setUser);
-      return () => unsubscribe();
-    }
-  }, []);
-
-  const handleNavigate = (route: string) => {
-    router.push(route);
-  };
+  const handleGoogle = () => signInWithRedirect({ provider: "Google" });
+  const handleLogout = () => signOut();
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <Header />
-      <h1 className="">
-        {!user ? (
-          <div>
-            <div className="w-[582px] bg-neutral-600 h-[263px] flex flex-col items-center justify-center rounded-xl">
-              <h1 className="font-bold text-white text-3xl">Sign Up</h1>
-              <button
-                onClick={HandleGoogle}
-                className="mt-4 bg-black text-white flex flex-row items-center justify-center rounded-lg px-6 py-2"
-              >
-                <img
-                  src="image_google.svg"
-                  alt="Google Icon"
-                  className="w-7 h-7 mr-4"
-                />
-                <div className="text-xl">Sign in with Google</div>
-              </button>
-              <div className="flex flex-row items-center justify-center text-xl font-thin mt-10">
-                <p className="text-white">Already have an account?</p>
-                <button
-                  className="underline text-yellow-400 ml-2"
-                  onClick={() => handleNavigate("/signIn")}
-                >
-                  Sign In
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center">
-            <p>Welcome, {user.displayName} from signUp</p>
-            <button
-              onClick={() => handleNavigate("/diia")}
-              className="mt-4 bg-black text-white flex flex-row items-center justify-center rounded-lg px-6 py-2"
-            >
-              <div className="text-xl">diia</div>
-            </button>
-            <button
-              onClick={HandleLogout}
-              className="mt-4 bg-gray-300 text-black p-3 rounded-lg"
-            >
-              Logout
+      {!user ? (
+        <div className="w-[582px] bg-neutral-600 h-[263px] flex flex-col items-center justify-center rounded-xl">
+          <h1 className="font-bold text-white text-3xl">Sign Up</h1>
+          <button
+            onClick={handleGoogle}
+            className="mt-4 bg-black text-white flex flex-row items-center justify-center rounded-lg px-6 py-2"
+          >
+            <img src="image_google.svg" alt="Google Icon" className="w-7 h-7 mr-4" />
+            <div className="text-xl">Sign up with Google</div>
+          </button>
+          <div className="flex flex-row items-center justify-center text-xl font-thin mt-10">
+            <p className="text-white">Already have an account?</p>
+            <button className="underline text-yellow-400 ml-2" onClick={() => nav("/signIn")}>
+              Sign In
             </button>
           </div>
-        )}
-      </h1>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-10">
+          <p className="text-2xl">Welcome, {user.username}</p>
+          <button
+            onClick={() => nav("/diiaAuth")}
+            className="mt-4 bg-black text-white flex flex-row items-center justify-center rounded-lg px-6 py-2"
+          >
+            <div className="text-xl">diia</div>
+          </button>
+          <button
+            onClick={handleLogout}
+            className="mt-4 bg-gray-300 text-black p-3 rounded-lg"
+          >
+            Logout
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default signUp;
+export default SignUp;

@@ -3,9 +3,10 @@ import { useRouter } from "next/router";
 import { useUser } from "@/context/context";
 import Image from "next/image";
 import Button from "@/components/layout/Button";
+import {useAuthenticator} from "@aws-amplify/ui-react";
 
 const Header = () => {
-  const { user } = useUser();
+  const { authStatus, user, signOut } = useAuthenticator();
   const router = useRouter();
 
   const handleClick = (route: string) => {
@@ -63,7 +64,7 @@ const Header = () => {
           />
         ) : (
           <a className="flex items-center gap-2" href="/signIn">
-            <h1 className="font-thin text-2xl">{user.displayName}</h1>
+            <h1 className="font-thin text-2xl">{user.username}</h1>
             <img src="user.svg" className="h-8 w-8 object-contain" />
           </a>
         )}

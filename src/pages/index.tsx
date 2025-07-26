@@ -2,24 +2,27 @@ import React, { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/features/landing/HeroSection";
-import BestChoices from "@/components/features/property/BestChoices";
-import StatsBlock from "@/components/features/landing/StatsBlock";
 import PopoutWindow from "@/components/features/auth/PopoutWindow";
-import { useUser } from "@/context/context";
 import { checkDiiaAuth } from "@/lib/api/diia";
 import TrustUs from "@/components/features/landing/TrustUs";
 import Achivements from "@/components/features/landing/Achivements";
 import ContactsSection from "@/components/features/landing/Contact";
+import {useAuthenticator} from "@aws-amplify/ui-react";
 
 const Home = () => {
-  const { user } = useUser();
   const [isDiiaAuthenticated, setIsDiiaAuthenticated] = useState(false);
 
+  const { authStatus, user } =
+    useAuthenticator(ctx => [ctx.authStatus, ctx.user]); // selector = fast
+
   useEffect(() => {
-    if (user) {
-      checkDiiaAuth().then(setIsDiiaAuthenticated).catch(console.error);
+    if (authStatus === 'authenticated') {
+      console.log('Signed‑in user:', user);
+      checkDiiaAuth()
+        .then(setIsDiiaAuthenticated)
+        .catch(console.error);
     }
-  }, [user]);
+  }, [authStatus, user]);
 
   return (
     <div>

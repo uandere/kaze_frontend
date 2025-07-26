@@ -13,7 +13,6 @@ import { useRouter } from "next/router";
 
 // Initial form state remains the same
 const initialFormData = {
-  // ... (your existing form data)
   description: "",
   isForRent: false,
   isPetFriendly: false,
