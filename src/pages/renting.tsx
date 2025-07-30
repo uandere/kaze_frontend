@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { db } from "../../firebase/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
-import PropertyCard from "@/components/estateCard";
-import Header from "@/components/header";
+import PropertyCard from "@/components/layout/PropertyCard";
+import Header from "@/components/layout/Header";
 import { useRouter } from "next/router";
 import { useUser } from "@/context/context"; // Use the user context
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
@@ -13,7 +13,7 @@ const HousesPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-  const itemsPerPage = 4;
+  const itemsPerPage = 2;
   const router = useRouter();
   //const { user, isAuthViaDiia } = useUser(); // Access user and Diia authentication status from context
   const { user } = useUser(); // Access user from context
@@ -175,7 +175,7 @@ const HousesPage: React.FC = () => {
     return (
       <div>
         <Header />
-        <div className="flex flex-row w-full">
+        <div className="flex flex-row w-full mt-36">
           <div className="w-1/2 p-5">
             <div className="flex flex-col space-y-4 mt-20 justify-center">
               <div className="w-full">
@@ -218,11 +218,36 @@ const HousesPage: React.FC = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 gap-4 p-5">
-              {currentHouses.map((house) => (
-                <div key={house.id} onClick={() => handleHouseClick(house)}>
-                  <PropertyCard propertyData={house} />
-                </div>
-              ))}
+              <PropertyCard
+                imageUrl="/image1.png"
+                address="Pymonenka Mykoly, 25a"
+                district="Lviv, Sykhivskyi District"
+                roomCount={1}
+                floor={5}
+                area={47}
+                price={19000}
+                onLearnMore={() => console.log("Redirect to property details")}
+              />
+              <PropertyCard
+                imageUrl="/image1.png"
+                address="Pymonenka Mykoly, 25a"
+                district="Lviv, Sykhivskyi District"
+                roomCount={1}
+                floor={5}
+                area={47}
+                price={19000}
+                onLearnMore={() => console.log("Redirect to property details")}
+              />
+              <PropertyCard
+                imageUrl="/image1.png"
+                address="Pymonenka Mykoly, 25a"
+                district="Lviv, Sykhivskyi District"
+                roomCount={1}
+                floor={5}
+                area={47}
+                price={19000}
+                onLearnMore={() => console.log("Redirect to property details")}
+              />
             </div>
             <div className="flex justify-center mt-6">
               <div className="flex space-x-2">
@@ -266,16 +291,27 @@ const HousesPage: React.FC = () => {
           {/* Sticky map iframe */}
           <div className="w-1/2 p-5 sticky top-20 h-screen overflow-hidden">
             <div className="flex justify-center h-full">
-              <iframe
-                className="h-full w-full"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv+${encodeURIComponent(
-                  selectedAddress ||
-                    "https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv"
-                )}`}
-              />
+              <div className="relative w-full h-full">
+                {/* Custom styled container with rounded corners and dark overlay */}
+                <div className="absolute inset-0 bg-gray-900 rounded-3xl overflow-hidden shadow-2xl">
+                  <iframe
+                    className="h-full w-full"
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv+${encodeURIComponent(
+                      selectedAddress ||
+                        "https://www.google.com/maps/embed/v1/place?key=AIzaSyBVGbMD3oScLkBQdjrj38lZqwGPm9UfsTU&q=Lviv"
+                    )}`}
+                    style={{
+                      filter:
+                        "invert(90%) hue-rotate(180deg) saturate(0.8) brightness(0.9)",
+                      borderRadius: "24px",
+                    }}
+                  />
+                </div>
+
+              </div>
             </div>
           </div>
         </div>

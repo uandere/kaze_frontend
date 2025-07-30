@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/features/landing/HeroSection";
-import BestChoices from "@/components/features/property/BestChoices";
-import StatsBlock from "@/components/features/landing/StatsBlock";
+import BestChoices from "@/components/features/landing/BestChoices";
 import PopoutWindow from "@/components/features/auth/PopoutWindow";
 import { useUser } from "@/context/context";
 import { checkDiiaAuth } from "@/lib/api/diia";
@@ -30,10 +29,11 @@ const Home = () => {
           text="Please, finish it to have full experience ❤️"
         />
       )}
-      <HeroSection />
-      <TrustUs/>
-      <Achivements/>
-      <ContactsSection/>
+        <HeroSection />
+      <BestChoices />
+      <TrustUs />
+      <Achivements />
+      <ContactsSection />
       <Footer />
     </div>
   );
