@@ -1,7 +1,11 @@
 import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'export'  // Enables static export mode
+  i18n: {
+    locales: ['en', 'ua'],
+    defaultLocale: 'en',
+  },
+  
 };
 
 export default nextConfig;
