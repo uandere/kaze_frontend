@@ -1,5 +1,4 @@
 import React from "react";
-import { Carousel } from "antd";
 import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
 import StairsIcon from "@mui/icons-material/Stairs";
 import CropFreeOutlinedIcon from "@mui/icons-material/CropFreeOutlined";
@@ -37,7 +36,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyData }) => {
     <div className="flex flex-row p-4 border rounded-lg border-[#ffd700]">
       <div className="flex justify-center items-center">
         <div className="w-80 h-80">
-          <Carousel autoplay arrows={true} adaptiveHeight={true}>
+          {/* <Carousel autoplay arrows={true} adaptiveHeight={true}>
             {imagePaths.map((photo: string, index: number) => (
               <div key={index} className="flex justify-center items-center">
                 <img
@@ -47,7 +46,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyData }) => {
                 />
               </div>
             ))}
-          </Carousel>
+          </Carousel> */}
         </div>
       </div>
 

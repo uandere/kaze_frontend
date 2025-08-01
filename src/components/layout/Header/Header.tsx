@@ -5,7 +5,7 @@ import Image from "next/image";
 import Button from "@/components/layout/Button";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import { useTranslations } from "@/hooks/useTranslation";
-import { MenuOutlined } from "@ant-design/icons";
+// import { MenuOutlined } from "@ant-design/icons";
 
 const Header = () => {
   const { user } = useUser();
@@ -90,7 +90,7 @@ const Header = () => {
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="text-white"
         >
-          <MenuOutlined style={{ fontSize: 28 }} />
+          {/* <MenuOutlined style={{ fontSize: 28 }} /> */}
         </button>
       </header>
 
